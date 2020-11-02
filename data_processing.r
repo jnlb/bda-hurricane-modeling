@@ -9,19 +9,30 @@ process_ships <- function(lines) {
     # handler; checks where an observation time starts & ends
     # sends a chunk of data to the process_timestep function
     
+    pb = txtProgressBar(min = 2, max = length(lines), initial = 2) 
+    
     start <- 1
     for (i in 2:length(lines)) {
         ## check if HEAD is in the line
         head <- grepl("HEAD", lines[i], fixed = TRUE)
         
         if (head) { ## if line contains HEAD, process prior chunk
-            process_timestep(lines[start:(i-1)])
+            temp <- process_timestep(lines[start:(i-1)])
+            
+            if (start < 2) {
+                df <- data.frame(temp)
+            }
+            else {
+                df1 <- data.frame(temp)
+                df <- rbind(df, df1)
+            }
+            
             start <- i
         }
-        
-        
+        setTxtProgressBar(pb,i)
     }
-    
+    write.csv(x=df, file="data/atl-ships-data.csv")
+    return(df)
 }
 
 process_timestep <- function(chunk) {
@@ -29,8 +40,15 @@ process_timestep <- function(chunk) {
     
     # first, get date and ID of the storm
     head <- unlist(strsplit(chunk[1], " +")) # used the regex '+'
+    varlist <- get_id_time(head)
     
+    for (j in 3:(length(chunk))) {
+        varname = substr(chunk[j], 117, 120) ## var ID on this position...
+        varvalue = gsub(" ", "", substr(chunk[j], 12, 15)) ## value (t0) here...
+        varlist[[varname]] <- as.numeric(varvalue)
+    }
     
+    return(varlist)
 }
 
 get_id_time <- function(headline) {

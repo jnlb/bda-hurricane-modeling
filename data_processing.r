@@ -1,7 +1,14 @@
 # functions to convert SHIPS data to CSV format
-# to-do:
-# 1. read lines from the dat file
-# 2. for each chunk, take out the time0 column
+# HOW TO USE:
+# SHIPS data is released by the americans as .DAT files
+# use an R function to read the lines of the DAT file, for example
+# f <- file("file_name.dat", open="r")
+# lines = readLines(f)
+# and then call process_ships on the lines variable:
+# process_ships(lines)
+# HOW IT WORKS:
+# 1. for every time step (6h) read the data for that time step
+# 2. for each time step, take out the time0 column
 # 3. move it to a data frame
 # 4. after done, save the df as csv
 

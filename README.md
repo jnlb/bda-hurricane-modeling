@@ -1,6 +1,37 @@
 # bda-hurricane-modeling
 Course project for the Aalto Bayesian Data Analysis 2020 course.
 
+## Initialize the R environment
+
+I have prepared some functions to make working smoother in the `init.r` file.
+How to load the data automatically: in the R console, write
+
+(make sure yout R console is at the correct working directory, call `getwd()` to 
+check which directory you are in)
+
+```
+source('init.r')
+load_data()
+```
+
+By default this also adds a variable `VMAX12` to the set. 
+The idea is that (all the other variables, VMAX, VMAX12) is treated as exchangeable.
+
+If you input something like `load_data(forecast=F)` then if F is a positive multiple
+of 6 the function will create a `VMAXF` variable instead. But maybe we can stick to
+the simpler case of 12 hour forecasts.
+
+Another part of the default config is that it automatically selects a small number 
+of variables. The default is `load_data(type="basic")` which keeps the variables 
+`CSST, RHLO, SHRD, T200` 
+(sea surface temp, rel. humidity at low altitiude, wind shear, and air temp at 200mb height).
+Later we can add other configurations to include other variables. You can also call
+`load_data(type="all")` if you want to keep the entire set.
+
+## Current next step...
+
+Test a simple Stan model with the "basic" data.
+
 ## Idea
 
 Under `data` there is a dataset `atl-ships-data.csv` with ~130 covariates and the outcome variable of interest, 

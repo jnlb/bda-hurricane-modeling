@@ -22,7 +22,7 @@ load_data <- function(type="basic", target="value", forecast=12) {
     # - "value" means you will predict the raw VMAX in 12 hours
     # - "delta" means you will predict the CHANGE of VMAX in 12 hours
     
-    df <- read.csv(file_path, na.strings="9999", nrows=12550)
+    df <- read.csv(file_path, na.strings="9999", nrows=12550, stringsAsFactors = FALSE)
     
     if (type == "basic") { # variables to select when called with "basic"
         vars <- c("CSST", "RHLO", "SHRD", "T200")
@@ -59,6 +59,7 @@ make_target <- function(df, type="value", forecast=12) {
                          rep(repval, gap))
     }
     
+
     df$temp <- c(df$ID[(1+gap):nrow(df)], rep(df$ID[nrow(df)], gap))
     df$temp <- ifelse(df$ID != df$temp, 1, 0)
     df[varname] <- df$temp*repval + (1-df$temp)*df[varname]

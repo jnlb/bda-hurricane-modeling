@@ -9,6 +9,7 @@
 # nrows = 12550 ## supposed to improve speed of read.csv function...
 
 data_path <- "data" # consider just reading these from somewhere?
+img_path <- "images" # should organize project so that images are stored here
 filename <- "atl-ships-data.csv"
 file_path <- file.path(data_path, filename)
 
@@ -30,7 +31,7 @@ load_data <- function(type="basic", forecast=12) {
     
     df <- make_target(df, forecast=forecast)
     
-    data <<- df
+    ships <<- df
 }
 
 make_target <- function(df, type="value", forecast=12) {

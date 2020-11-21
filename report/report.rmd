@@ -1,0 +1,22 @@
+---
+title: "BDA Project: Hurricane forecasting in Stan"
+author: "José & Jonas"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+## Data
+
+## Models
+
+# Analysis
+
+# Stan code

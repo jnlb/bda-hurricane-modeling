@@ -6,13 +6,17 @@ Course project for the Aalto Bayesian Data Analysis 2020 course.
 I have prepared some functions to make working smoother in the `init.r` file.
 How to load the data automatically: in the R console, write
 
-(make sure yout R console is at the correct working directory, call `getwd()` to 
+(make sure your R console is at the correct working directory, call `getwd()` to 
 check which directory you are in)
 
 ```
 source('init.r')
 load_data()
 ```
+
+I added an Rproj file to this repo so that you can open it to the correct wd in Rstudio
+automatically. I didn't commit my `.Rprofile` file but I also recommend creating a 
+1-line `.Rprofile` file with `source('init.r')`. 
 
 By default this also adds a variable `VMAX12` to the set. 
 The idea is that (all the other variables, VMAX, VMAX12) is treated as exchangeable.

@@ -21,20 +21,50 @@ automatically. I didn't commit my `.Rprofile` file but I also recommend creating
 By default this also adds a variable `VMAX12` to the set. 
 The idea is that (all the other variables, VMAX, VMAX12) is treated as exchangeable.
 
-If you input something like `load_data(forecast=F)` then if F is a positive multiple
+## How to use load_data()
+
+**Forecast period:** If you input something like `load_data(forecast=F)` then if F is a positive multiple
 of 6 the function will create a `VMAXF` variable instead. But maybe we can stick to
 the simpler case of 12 hour forecasts.
 
-Another part of the default config is that it automatically selects a small number 
+**Variable selection:** Another part of the default config is that it automatically selects a small number 
 of variables. The default is `load_data(type="basic")` which keeps the variables 
 `CSST, RHLO, SHRD, T200` 
 (sea surface temp, rel. humidity at low altitiude, wind shear, and air temp at 200mb height).
 Later we can add other configurations to include other variables. You can also call
 `load_data(type="all")` if you want to keep the entire set.
 
-## Current next step...
+**DELTA-V vs. FUTURE VMAX:** Finally, there is an option to select creation of a 
+'delta' type variable by writing `load_data(target="delta")`. This creates instead
+a variable `DELTA12(t) = VMAX(t+12) - VMAX(t)`. However the default is 
+`target="value` which creates the normal `VMAX12` target variable.
 
-Test a simple Stan model with the "basic" data.
+## Current next step(s)...
+
+I was thinking of letting you (José) write the first basic Stan code which we then 
+use to develop further. 
+
+At first you can use default settings for everything. I would suggest using a 
+multivariate normal prior so that the covariance structure of the variables can be
+learned better. That mean that with e.g. 10 variables you would create in Stan a 
+10-element vector parameter and give it a 10-dim multivariate normal. IIRC we did 
+something like this in one of the bioassay assignments.
+
+It would be interesting then to see if the results get better if you change to 
+`target="delta"`. It *shouldn't* but maybe the Monte Carlo simulations become more 
+stable? 
+
+After this we would really have to do some variable selection. This is in fact an 
+interesting topic in itself. We could research how to do efficient variable 
+selection in Stan and base a large part of the project on this.
+
+Since we are mostly replicating the method of the American government 
+forecasting agency we probably don't need to try any different, fancier models. 
+But one potential adjustment would be to design some kind of hierarchical setting,
+it's not clear exactly how to do this though. One idea is to 'group' according to
+storm ID. Another would be to group by month or by geographical region. All of 
+these are quite reasonable since storm evolution tends to be quite different dep. on
+month and which sector the storm forms in.
 
 ## Idea
 

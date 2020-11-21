@@ -13,11 +13,14 @@ img_path <- "images" # should organize project so that images are stored here
 filename <- "atl-ships-data.csv"
 file_path <- file.path(data_path, filename)
 
-load_data <- function(type="basic", forecast=12) {
+load_data <- function(type="basic", target="value", forecast=12) {
     # simple start function; like calling data("bioassay") in BDA3
     # in future; consider rewriting to make this more generally applicable
     # you can choose forecast to be any positive multiple of 6
     # type: which type of model to use; "basic" selects just a few variables
+    # target: 
+    # - "value" means you will predict the raw VMAX in 12 hours
+    # - "delta" means you will predict the CHANGE of VMAX in 12 hours
     
     df <- read.csv(file_path, na.strings="9999", nrows=12550)
     
@@ -29,7 +32,7 @@ load_data <- function(type="basic", forecast=12) {
         df <- df[]
     }
     
-    df <- make_target(df, forecast=forecast)
+    df <- make_target(df, type=target, forecast=forecast)
     
     ships <<- df
 }
@@ -42,22 +45,34 @@ make_target <- function(df, type="value", forecast=12) {
     # forecast=12; the default is a 12-hour forecast, i.e. 2 rows in the data
     # currently only works for forecast = positive multiple of 6
     
-    varname <- paste0("VMAX",forecast)
     gap <- forecast %/% 6
-    df[varname] <- c(df$VMAX[(1+gap):nrow(df)], rep(20, gap)) # tempr hack
+    
+    if (type=="value") {
+        varname <- paste0("VMAX",forecast)
+        repval <- 20
+        df[varname] <- c(df$VMAX[(1+gap):nrow(df)], rep(repval, gap)) # tempr hack
+    }
+    else { ## in case you create a 'delta' variable
+        varname <- paste0("DELTA",forecast)
+        repval <- 0
+        df[varname] <- c(df$VMAX[(1+gap):nrow(df)] - df$VMAX[1:(nrow(df)-gap)], 
+                         rep(repval, gap))
+    }
+    
     df$temp <- c(df$ID[(1+gap):nrow(df)], rep(df$ID[nrow(df)], gap))
-    by(df, 1:nrow(df), replace_mismatch, forecast=forecast)
+    df$temp <- ifelse(df$ID != df$temp, 1, 0)
+    df[varname] <- df$temp*repval + (1-df$temp)*df[varname]
     df$temp <- NULL
     
     return(df)
 }
 
-replace_mismatch <- function(row, forecast=12, repvalue=20) {
+replace_mismatch <- function(row, varname, repvalue=20) {
+    # DEPRECATED; USING FASTER VECTORIZATION NOW
     # helper function
     
-    varname <- paste0("VMAX",forecast)
     if (row$ID != row$temp) {
-        row[varname] <- 20
+        row[varname] <- repvalue
     }
     
 }

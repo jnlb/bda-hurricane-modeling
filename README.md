@@ -41,8 +41,7 @@ a variable `DELTA12(t) = VMAX(t+12) - VMAX(t)`. However the default is
 
 ## Current next step(s)...
 
-I was thinking of letting you (José) write the first basic Stan code which we then 
-use to develop further. 
+I (José) wrote a first basic Stan code using uniform priors, I will try to use proper priors this afternoon.
 
 At first you can use default settings for everything. I would suggest using a 
 multivariate normal prior so that the covariance structure of the variables can be

@@ -37,7 +37,7 @@ Later we can add other configurations to include other variables. You can also c
 **DELTA-V vs. FUTURE VMAX:** Finally, there is an option to select creation of a 
 'delta' type variable by writing `load_data(target="delta")`. This creates instead
 a variable `DELTA12(t) = VMAX(t+12) - VMAX(t)`. However the default is 
-`target="value` which creates the normal `VMAX12` target variable.
+`target="value"` which creates the normal `VMAX12` target variable.
 
 ## Current next step(s)...
 

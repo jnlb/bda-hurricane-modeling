@@ -11,12 +11,22 @@ ships <- complete(imp)
 
 
 # Modelling
-stan_data <- list(y = ships$VMAX12,
-                  x = ships[,3:9],
-                  N = nrow(ships),
-                  J = 7)
+y = ships[,ncol(ships)]
+x = ships[,3:9]
+N = nrow(ships)
+J = ncol(x)
+mu = rep(0, times=J+1)
+Sig <- matrix(0, J+1, J+1)
+diag(Sig) <- 100 # weak prior variances
 
-m <- rstan::stan_model(file = "model.stan") #uniform priors, I need to change them to proper priors
+stan_data <- list(y = y,
+                  x = x,
+                  N = N,
+                  J = J,
+                  mu = mu,
+                  tau = Sig)
+
+m <- rstan::stan_model(file = file.path(mod_path, "simple_linear.stan")) #uniform priors, I need to change them to proper priors
 model <- rstan::sampling(m, data = stan_data, seed = SEED)
 
 

@@ -8,8 +8,12 @@
 # to this file
 # nrows = 12550 ## supposed to improve speed of read.csv function...
 
+library(parallel)
+options("mc.cores"=detectCores()) # to speed up MCMC simulation
+
 data_path <- "data" # consider just reading these from somewhere?
 img_path <- "images" # should organize project so that images are stored here
+mod_path <- "models" # directory for storing stan model files
 filename <- "atl-ships-data.csv"
 file_path <- file.path(data_path, filename)
 
@@ -33,6 +37,9 @@ load_data <- function(type="basic", target="value", forecast=12) {
     }
     
     df <- make_target(df, type=target, forecast=forecast)
+    y_mu <<- mean(df[,ncol(df)])
+    y_sd <<- sd(df[,ncol(df)])
+    df <- normalize(df)
     
     ships <<- df
 }
@@ -66,6 +73,25 @@ make_target <- function(df, type="value", forecast=12) {
     df$temp <- NULL
     
     return(df)
+}
+
+normalize <- function(df) {
+    # apply the scale function on every numeric column in the DF
+    # scale standardizes column-wise data
+    
+    coltypes <- sapply(df, class) # check data type of the columns
+    df[,coltypes!='character'] <- scale(df[,coltypes!='character']) # standard
+    
+    return(df)
+}
+
+transform_back <- function(y, mu = y_mu, sd = y_sd) {
+    # when we normalize the SHIPS data we also want to be able to return
+    # to the natural scale; 
+    # this function returns Stan samples of VMAX to the natural scale
+    
+    y_tf <- (y + y_mu)*y_sd
+    return(y_tf)
 }
 
 replace_mismatch <- function(row, varname, repvalue=20) {

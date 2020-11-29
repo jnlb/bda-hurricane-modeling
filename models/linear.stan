@@ -15,5 +15,6 @@ parameters {
 
 model {
   theta ~ multi_normal(mu, tau);
+  sigma ~ inv_chi_square(0.1);
   y  ~ normal( theta[1] + x*theta[2:J+1], sigma);
 }

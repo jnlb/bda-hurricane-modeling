@@ -17,7 +17,8 @@ mod_path <- "models" # directory for storing stan model files
 filename <- "atl-ships-data.csv"
 file_path <- file.path(data_path, filename)
 
-load_data <- function(type="basic", target="value", forecast=12) {
+load_data <- function(type="basic", target="value", forecast=12, 
+                      standardize=FALSE) {
     # simple start function; like calling data("bioassay") in BDA3
     # in future; consider rewriting to make this more generally applicable
     # you can choose forecast to be any positive multiple of 6
@@ -26,20 +27,39 @@ load_data <- function(type="basic", target="value", forecast=12) {
     # - "value" means you will predict the raw VMAX in 12 hours
     # - "delta" means you will predict the CHANGE of VMAX in 12 hours
     
-    df <- read.csv(file_path, na.strings="9999", nrows=12550, stringsAsFactors = FALSE)
+    df <- read.csv(file_path, na.strings="9999", nrows=12550, 
+                   stringsAsFactors = FALSE)
+    df <- df[,sapply(df, #from 140 to 120
+                           function(x) sum(length(which(is.na(x))))) < n*0.25] 
     
     if (type == "basic") { # variables to select when called with "basic"
         vars <- c("CSST", "RHLO", "SHRD", "T200")
         df <- df[c("ID", "TIME", "LAT.", "LON.", vars, "VMAX")]
     }
-    else {
-        df <- df[]
+    else if (type=="large") {
+        vars <- c("HIST", "INCV", "CSST", "CD20", "NAGE", "U200", "V20C",
+                  "ENEG", "RHLO", "RHHI", "PSLV", "D200", "REFC", "PEFC",
+                  "TWXC", "G200", "G250", "TGRD", "TADV", "SHDC", "SDDC",
+                  "T150", "T200", "SHRD", "SHTD", "VMPI", "VVAV", "CFLX")
+        df <- df[c("ID", "TIME", "LAT.", "LON.", vars, "VMAX")]
+    }
+    else if (type=="nonlinear") {
+        vars <- c("INCV", "U200", "RHMD", "REFC", "G250", "T150", "VVAV", 
+                  "CSST", "SHRD")
+        df <- df[c("ID", "TIME", "LAT.", "LON.", vars, "VMAX")]
+    }
+    else { # the "all" variables model is horrifyingly slow to sample
+        df <- df[, !names(df) %in% c("X", "MSLP", "DELV")] # redundant/junk vars
+        df <- df[,1:(ncol(df)-43)] # last batch of variables are junk
     }
     
     df <- make_target(df, type=target, forecast=forecast)
-    y_mu <<- mean(df[,ncol(df)])
-    y_sd <<- sd(df[,ncol(df)])
-    df <- normalize(df)
+    
+    if (standardize) { # considered moving to a standardized scale
+        y_mu <<- mean(df[,ncol(df)]) # need to save quantities needed for
+        y_sd <<- sd(df[,ncol(df)]) # transforming back to natural scale
+        df <- normalize(df)
+    }
     
     ships <<- df
 }
@@ -57,7 +77,7 @@ make_target <- function(df, type="value", forecast=12) {
     if (type=="value") {
         varname <- paste0("VMAX",forecast)
         repval <- 20
-        df[varname] <- c(df$VMAX[(1+gap):nrow(df)], rep(repval, gap)) # tempr hack
+        df[varname] <- c(df$VMAX[(1+gap):nrow(df)], rep(repval, gap)) #temp hack
     }
     else { ## in case you create a 'delta' variable
         varname <- paste0("DELTA",forecast)

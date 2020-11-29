@@ -1,6 +1,6 @@
 source('init.r')
 library(rstan)
-load_data(type="nonlinear", target="delta", 
+load_data(type="large", target="delta", 
           standardize=TRUE)
 SEED <- 123
 
@@ -30,7 +30,7 @@ stan_data <- list(y = y,
                   tau = Sig)
 
 m <- rstan::stan_model(file = file.path(mod_path, "linear.stan")) #uniform priors, I need to change them to proper priors
-model <- rstan::sampling(m, data = stan_data, iter=4000, seed = SEED)
+model <- rstan::sampling(m, data = stan_data, iter=35000, seed = SEED)
 
 
 # Convergence diagnostics

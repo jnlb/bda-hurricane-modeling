@@ -29,8 +29,8 @@ load_data <- function(type="basic", target="value", forecast=12,
     
     df <- read.csv(file_path, na.strings="9999", nrows=12550, 
                    stringsAsFactors = FALSE)
-    df <- df[,sapply(df, #from 140 to 120
-                           function(x) sum(length(which(is.na(x))))) < n*0.25] 
+    df <- df[,sapply(df, 
+                     function(x) sum(length(which(is.na(x))))) < nrow(df)*0.25] 
     
     if (type == "basic") { # variables to select when called with "basic"
         vars <- c("CSST", "RHLO", "SHRD", "T200")

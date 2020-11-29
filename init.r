@@ -36,7 +36,7 @@ load_data <- function(type="basic", target="value", forecast=12,
         vars <- c("CSST", "RHLO", "SHRD", "T200")
         df <- df[c("ID", "TIME", "LAT.", "LON.", vars, "VMAX")]
     }
-    else if (type=="large") {
+    else if (type=="large") { # DO NOT USE; TAKES 6+ HOURS TO SAMPLE
         vars <- c("HIST", "INCV", "CSST", "CD20", "NAGE", "U200", "V20C",
                   "ENEG", "RHLO", "RHHI", "PSLV", "D200", "REFC", "PEFC",
                   "TWXC", "G200", "G250", "TGRD", "TADV", "SHDC", "SDDC",

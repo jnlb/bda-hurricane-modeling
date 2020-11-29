@@ -1,6 +1,6 @@
 source('init.r')
 library(rstan)
-load_data(type="nonlinear", target="delta", 
+load_data(type="basic", target="delta", 
           standardize=TRUE)
 SEED <- 123
 
@@ -16,21 +16,35 @@ coltypes <- sapply(ships, class)
 
 y = ships[,ncol(ships)]
 x = ships[,coltypes!='character']
+sst = x[,"CSST"]
+shr = x[,"SHRD"]
+x_sst = x[,c("RHLO", "T200", "SHRD")]
+x_shr = x[,c("LAT.", "VMAX")]
 N = nrow(ships)
-J = ncol(x)
-mu = rep(0, times=J+1)
-Sig <- matrix(0, J+1, J+1)
-diag(Sig) <- 100 # weak prior variances
+Jsst = ncol(x_sst)
+Jshr = ncol(x_shr)
+mu_sst = rep(0, times=Jsst+1)
+Sig_sst <- matrix(0, Jsst+1, Jsst+1)
+diag(Sig_sst) <- 10 # weak prior variances
+mu_shr = rep(0, times=Jshr+1)
+Sig_shr <- matrix(0, Jshr+1, Jshr+1)
+diag(Sig_shr) <- 10 # weak prior variances
 
 stan_data <- list(y = y,
-                  x = x,
+                  sst = sst,
+                  shr = shr,
+                  x_i = x_sst,
+                  x_w = x_shr,
                   N = N,
-                  J = J,
-                  mu = mu,
-                  tau = Sig)
+                  Ji = Jsst,
+                  Jw = Jshr,
+                  mu_i = mu_sst,
+                  mu_w = mu_shr,
+                  tau_i = Sig_sst,
+                  tau_w = Sig_shr)
 
-m <- rstan::stan_model(file = file.path(mod_path, "linear.stan")) #uniform priors, I need to change them to proper priors
-model <- rstan::sampling(m, data = stan_data, iter=4000, seed = SEED)
+m <- rstan::stan_model(file = file.path(mod_path, "nonlinear.stan"))
+model <- rstan::sampling(m, data = stan_data, iter=2000, seed = SEED)
 
 
 # Convergence diagnostics

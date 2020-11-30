@@ -1,6 +1,6 @@
 source('init.r')
 library(rstan)
-load_data(type="linear", target="delta", 
+load_data(type="basic", target="delta", 
           standardize=TRUE)
 SEED <- 123
 

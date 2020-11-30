@@ -41,29 +41,30 @@ a variable `DELTA12(t) = VMAX(t+12) - VMAX(t)`. However the default is
 
 ## Current next step(s)...
 
-I (José) wrote a first basic Stan code using uniform priors, I will try to use proper priors this afternoon.
+**30th Nov Update:** Over the weekend I developed some models. I've learned some things. 
+First, we probably can't expect any high quality predictions out of these models. Even so, 
+it's worth doing the model selection and finishing the report. A negative result is also a result.
 
-At first you can use default settings for everything. I would suggest using a 
-multivariate normal prior so that the covariance structure of the variables can be
-learned better. That mean that with e.g. 10 variables you would create in Stan a 
-10-element vector parameter and give it a 10-dim multivariate normal. IIRC we did 
-something like this in one of the bioassay assignments.
+Second, fitting some of these models with RStan can take a ridiculous amount of time. I added 
+multicore settings to RStan so that (assuming you have a 4-core CPU), it simulates 4 chains on 
+4 different CPU cores. Despite all of this, you can probably start an MCMC run and go have lunch, or 
+read BDA3 or watch Youtube or something.
 
-It would be interesting then to see if the results get better if you change to 
-`target="delta"`. It *shouldn't* but maybe the Monte Carlo simulations become more 
-stable? 
+Here are a list of models to use:
 
-After this we would really have to do some variable selection. This is in fact an 
-interesting topic in itself. We could research how to do efficient variable 
-selection in Stan and base a large part of the project on this.
+- basic+linear: `load_data(type='basic')`, and `linear.stan` (in the R script: `linear_model.R`)
+- basic+nonlinear: `load_data(type='basic')`, and `nonlinear.stan` (R script: `modelling.R`)
+- nonlinear+nonlinear: `load_data(type='nonlinear')`, and `nonlinear.stan` (`nonlinear_model.R`)
 
-Since we are mostly replicating the method of the American government 
-forecasting agency we probably don't need to try any different, fancier models. 
-But one potential adjustment would be to design some kind of hierarchical setting,
-it's not clear exactly how to do this though. One idea is to 'group' according to
-storm ID. Another would be to group by month or by geographical region. All of 
-these are quite reasonable since storm evolution tends to be quite different dep. on
-month and which sector the storm forms in.
+All of the above are using a 'delta' type target (VMAX12 - VMAX). Could also change to a 'value' type 
+(i.e. predicting raw VMAX12). Could also try using the 'nonlinear' variable set in the 'linear.stan' 
+model (this would just entail changing to `type='nonlinear'` in the `load_data()` function in the 
+`linear_model.R` script. 
+
+This has kind of made me wonder, what kind of covariation does just the reduced variable set 
+`CSST, SHRD, VMAX` have. There must be some pattern that our linear models fail to find. But at this 
+point it's probably no longer reasonable to completely change direction and develop something new 
+for the project.
 
 ## Idea
 

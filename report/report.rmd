@@ -9,6 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 # Introduction
@@ -45,12 +46,16 @@ Describing all of the variables in the dataset is far outside the scope of this 
 From the initial 140 variables included in our data, by removing the variables with too many NAs, using our prior knowledge, and observing how the variables correlate, we decided to study two subsets of our data, one small subset of 10 variables that we will be calling "basic" from now on, and another including 15 variables that we will be calling "nonlinear".
 
 ```{r, include=FALSE}
-#I directly added the image, but if you prefer to use r code to show the image, that's fine with me
+#I directly added the image, but if you prefer to use the r code that creates the image, that's fine with me
 
-##I will add the correct path once I am using ubuntu again (It broke, and I am using windows now)
+path <- paste(dirname(getwd()), "/images/correlation_delta_small.png", sep="")
+pareto_linear_path <- paste(dirname(getwd()), "/images/pareto_linear.png", sep="")
+pareto_basic_path <- paste(dirname(getwd()), "/images/pareto_basic_nonlinear.png", sep="")
+pareto_nonlinear_path <- paste(dirname(getwd()), "/images/pareto_nonlinear_nonlinear.png", sep="")
+
 ```
 
-![Correlation plot of the variables we will include in the models.](images/correlation_delta_small.png)
+![Correlation plot of the variables we will include in the models.](`r path`)
 
 
 ### Prior work with the data
@@ -64,10 +69,9 @@ Three different models have been used to study how the maximum wind speed will c
 The code for the linear hierarchical model is the following one:
 ```{r}
 writeLines(readLines("models/linear.stan"))
-#I need to cite the rhat paper
 ```
 
-We run this model for 4000 iterations with 2000 as warm-up using the "basic" dataset. All the $\hat{R}$ values approximated to 1, which means that we run enough iterations to reach convergence. If this was not the case and the ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. We used the definition of $\hat{R}$ that can be found in 
+We run this model for 4000 iterations with 2000 as warm-up using the "basic" dataset. All the $\hat{R}$ values approximated to 1, which means that we run enough iterations to reach convergence. If this was not the case and the ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. We used the definition of $\hat{R}$ that can be found [here](https://arxiv.org/abs/1903.08008).
 
 The nonlinear hierarchical model is the next one:
 ```{r}
@@ -77,3 +81,19 @@ writeLines(readLines("models/nonlinear.stan"))
 This model was executed twice, the first time we used the "basic" dataset for 2000 iterations with 1000 as warm-up, because it takes too long to run, but this number of iterations was enough to reach convergence: all $\hat{R}$ values were approximated to 1.0. For the second execution, the "nonlinear" dataset was used for 4000 iterations (2000 as warm-up) and convergence was also reached.
 
 ## Models Comparison
+
+We assessed the models using leave-one-out cross-validation (LOO-CV) for further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
+
+The PSIS-LOO elpd for the linear model is 115339.2, the effective number of parameters is 1.0 with looic of -230678.4 and Monte Carlo Standard Error of 0.1. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
+
+![K-values for the linear model.](`r pareto_linear_path`)
+
+The PSIS-LOO elpd for the nonlinear model using the "basic" dataset is -17576.5, the effective number of parameters is 7.1 with looic of 35153.0 and Monte Carlo Standard Error approximating to 0.0. All the Pareto k estimates are lower than 0.5 as well, as we can see in Figure. X+1, so the PSIS-LOO estimate can be considered as reliable.
+
+![K-values for the "basic" nonlinear model.](`r pareto_basic_path`)
+
+The PSIS-LOO elpd for the nonlinear model with the "nonlinear" data is -17576.8, the effective number of parameters is 7.6 with looic of 35153.6 and Monte Carlo Standard Error approximating to 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X+2, so the PSIS-LOO estimate can be considered to be reliable.
+
+![K-values for the "nonlinear" nonlinear model.](`r pareto_nonlinear_path`)
+
+The nonlinear model using the "nonlinear" data has the lowest PSIS-LOO and the highest looic associated to it, extremely similar values to the nonlinear model using the "basic" data. But in order to assess the differences between the models we have used the function \textit{loo_compare}. When elpd_diff is 0 and se_diff is 0 for the lineal model, they are -132915.7 and 176.8 for the "basic" nonlinear model, and -132916.0 and 176.8 for the "nonlinear" nonlinear model. This means that the linear model is the worst one and that both "nonlinear" models are similar enough, so the extra variables added to the "nonlinear" model do not include new extra information.

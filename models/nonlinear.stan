@@ -39,3 +39,9 @@ model {
   shr ~ normal(theta_w[1] + x_w*theta_w[2:Jw+1], sigma_shr);
   y  ~ normal( alpha[1] + alpha[2]*sst + alpha[3]*shr, sigma);
 }
+
+generated quantities {
+  vector[N] log_lik;
+  for (n in 1:N) {
+    log_lik[n] = normal_lpdf(y[n] | alpha[1] + alpha[2]*sst[n] + alpha[3]*shr[n], sigma);
+}}

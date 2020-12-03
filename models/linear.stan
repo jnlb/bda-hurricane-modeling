@@ -18,3 +18,9 @@ model {
   sigma ~ inv_chi_square(0.1);
   y  ~ normal( theta[1] + x*theta[2:J+1], sigma);
 }
+
+generated quantities {
+  vector[N] log_lik;
+  for (n in 1:N) {
+    log_lik[n] = normal_lpdf(y[n] | theta[1] + x[n]*theta[2:J+1], sigma);
+}}

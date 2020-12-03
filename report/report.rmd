@@ -1,6 +1,6 @@
 ---
 title: "BDA Project: Hurricane forecasting in Stan"
-author: "José & Jonas"
+author: "José Miguel Ramírez & Jonas Lindblad"
 output: 
   pdf_document: 
     toc: yes
@@ -25,6 +25,7 @@ In this project, we develop models inspired by the SHIPS scheme and using the SH
 
 ```{r include=FALSE}
 # Execute init and data_load() here?
+## I think we don't have to include all our code in this file, they just want a pdf explaining the steps
 ```
 
 This project uses the 'Developmental Data' from the SHIPS website: [SHIPS Developmental Data](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/developmental_data.asp). To be precise, we limit ourselves to the Atlantic version of the SHIPS data, and use the data from the 5-day SHIPS predictor file for the Atlantic. This data contains ~140 variables in 6-hourly time steps for every hurricane season 1982-2019. 
@@ -35,18 +36,44 @@ Describing all of the variables in the dataset is far outside the scope of this 
 
 **Include a picture example to go along with how the variables are computed?**
 
-**VMAX:** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset).
+**Maximum wind speed (VMAX):** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset). The DELTA12 variable corresponds to the value we want to predict: how the maximum wind speed will change in 12 days.
 
-**Wind shear:** Wind shear is the phenomenon where the wind direction and speed differs significantly depending on height. The SHIPS dataset contains several wind shear variables, since wind shear is known to be an important variable that can impact the development of a tropical storm. In regions with high wind shear, it can be very difficult for a storm to intensify since excess energy is required for the storm to maintain stability. Sometimes high wind shear can displace and 'rip apart' a storm, causing it to weaken and potentially dissipate. Wind shear quantities are averages computed from wind data in the grid discretization of the atmosphere.
+**Wind shear (SHRD):** Wind shear is the phenomenon where the wind direction and speed differs significantly depending on height. The SHIPS dataset contains several wind shear variables, since wind shear is known to be an important variable that can impact the development of a tropical storm. In regions with high wind shear, it can be very difficult for a storm to intensify since excess energy is required for the storm to maintain stability. Sometimes high wind shear can displace and 'rip apart' a storm, causing it to weaken and potentially dissipate. Wind shear quantities are averages computed from wind data in the grid discretization of the atmosphere.
 
-**Sea temperature:** The main energy source for tropical storms is the thermal energy in the sea, both the sea surface temperature and the deeper ocean heat content. The SHIPS dataset contains several variables representing the sea temperature, and these are well-known to correspond to storm intensification. The main physical process is that hot water evaporates, causing upward winds (convection) that lower the pressure inside the eye of the storm. This in turn causes winds to intensify as larger masses of the atmosphere get pushed towards the low-pressure point in the storm eye. These quantities are based on direct measurements from buoys and satellite remote sensing.
+**Sea temperature (CSST):** The main energy source for tropical storms is the thermal energy in the sea, both the sea surface temperature and the deeper ocean heat content. The SHIPS dataset contains several variables representing the sea temperature, and these are well-known to correspond to storm intensification. The main physical process is that hot water evaporates, causing upward winds (convection) that lower the pressure inside the eye of the storm. This in turn causes winds to intensify as larger masses of the atmosphere get pushed towards the low-pressure point in the storm eye. These quantities are based on direct measurements from buoys and satellite remote sensing.
+
+From the initial 140 variables included in our data, by removing the variables with too many NAs, using our prior knowledge, and observing how the variables correlate, we decided to study two subsets of our data, one small subset of 10 variables that we will be calling "basic" from now on, and another including 15 variables that we will be calling "nonlinear".
+
+```{r, include=FALSE}
+#I directly added the image, but if you prefer to use r code to show the image, that's fine with me
+
+##I will add the correct path once I am using ubuntu again (It broke, and I am using windows now)
+```
+
+![Correlation plot of the variables we will include in the models.](images/correlation_delta_small.png)
+
 
 ### Prior work with the data
 
 Although the data is publicly available with no restrictions, not much work using it can be found. This may be because of the lack of general interest in meteorology or possibly the poor state of the documentation. The authors of this report are not aware of any other work with this data apart from scientific publications by the American researchers involved in the SHIPS model development. The bulk of this research is available at the SHIPS website: [SHIPS Model References](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/references.asp).
 
-## Models
+# Modelling
 
-# Analysis
+Three different models have been used to study how the maximum wind speed will change in 12 days. The first one is a linear hierarchical model with a small subset of variables ("basic"), whereas the other two are nonlinear hierarchical models using different subsets of variables: the "basic" subset, and the "nonlinear" set. In all cases we decided to use weakly informative priors: the means are equal to 0, and the variances are set to 10.
 
-# Stan code
+The code for the linear hierarchical model is the following one:
+```{r}
+writeLines(readLines("models/linear.stan"))
+#I need to cite the rhat paper
+```
+
+We run this model for 4000 iterations with 2000 as warm-up using the "basic" dataset. All the $\hat{R}$ values approximated to 1, which means that we run enough iterations to reach convergence. If this was not the case and the ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. We used the definition of $\hat{R}$ that can be found in 
+
+The nonlinear hierarchical model is the next one:
+```{r}
+writeLines(readLines("models/nonlinear.stan"))
+```
+
+This model was executed twice, the first time we used the "basic" dataset for 2000 iterations with 1000 as warm-up, because it takes too long to run, but this number of iterations was enough to reach convergence: all $\hat{R}$ values were approximated to 1.0. For the second execution, the "nonlinear" dataset was used for 4000 iterations (2000 as warm-up) and convergence was also reached.
+
+## Models Comparison

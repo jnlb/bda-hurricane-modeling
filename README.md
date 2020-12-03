@@ -66,6 +66,15 @@ This has kind of made me wonder, what kind of covariation does just the reduced 
 point it's probably no longer reasonable to completely change direction and develop something new 
 for the project.
 
+**3rd Dec Update:**
+I executed all the model, but I just realized that the second one only run for 2000 iterations (convergence was reached, but it is running now for 4000).
+
+I merged all the three model executions to one file where the comparison is performed, I added it here, but I did not remove the individuals R files.
+
+The linear model is the worst, and the other ones are extremely similar, which means that some of the variables included in the so-called "nonlinear" data are not necessary, however I though that the "nonlinear" dataset contained the same as the the "basic" dataset + other variables, but two of the variables in the "basic" are not in the "nonlinear".
+
+I also added a small correlation plot of the variables we actually use (we can include it or not, but I think it can be nice)
+
 ## Idea
 
 Under `data` there is a dataset `atl-ships-data.csv` with ~130 covariates and the outcome variable of interest, 

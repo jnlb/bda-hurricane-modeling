@@ -20,3 +20,10 @@ png(file="images/corrplot_delta_2.png")
 corrplot(correlation, method="circle", tl.col = "black", tl.cex = 0.75)
 dev.off()
 
+indexes <- which( colnames(ships) %in% c("DELTA12", "LAT.", "LON.","CSST", 
+                                         "RHLO", "SHRD", "T200", "INCV", "U200", 
+                                         "RHMD", "REFC", "G250", "T150", "VVAV") ) 
+correlation <- cor(ships[,indexes], use = "complete.obs")
+png(file="images/corrplot_delta_small.png")
+corrplot(correlation, method="circle", tl.col = "black", tl.cex = 0.75)
+dev.off()

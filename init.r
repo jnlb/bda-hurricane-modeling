@@ -17,6 +17,9 @@ mod_path <- "models" # directory for storing stan model files
 filename <- "atl-ships-data.csv"
 file_path <- file.path(data_path, filename)
 
+# default years to keep
+years <- c("2017", "2018", "2019")
+
 load_data <- function(type="basic", target="value", forecast=12, 
                       standardize=FALSE) {
     # simple start function; like calling data("bioassay") in BDA3
@@ -29,8 +32,11 @@ load_data <- function(type="basic", target="value", forecast=12,
     
     df <- read.csv(file_path, na.strings="9999", nrows=12550, 
                    stringsAsFactors = FALSE)
+    df <- df[sapply(df[,"TIME"], function(x) str_find(years, x)),]
     df <- df[,sapply(df, 
                      function(x) sum(length(which(is.na(x))))) < nrow(df)*0.25] 
+    
+    
     
     if (type == "basic") { # variables to select when called with "basic"
         vars <- c("CSST", "RHLO", "SHRD", "T200")
@@ -48,6 +54,10 @@ load_data <- function(type="basic", target="value", forecast=12,
                   "CSST", "SHRD")
         df <- df[c("ID", "TIME", "LAT.", "LON.", vars, "VMAX")]
     }
+    else if (type=="minimal-A") {
+        vars <- c("CSST", "SHRD")
+        df <- df[c("ID", "TIME", vars, "VMAX")]
+    }
     else { # the "all" variables model is horrifyingly slow to sample
         df <- df[, !names(df) %in% c("X", "MSLP", "DELV")] # redundant/junk vars
         df <- df[,1:(ncol(df)-43)] # last batch of variables are junk
@@ -63,6 +73,7 @@ load_data <- function(type="basic", target="value", forecast=12,
     
     ships <<- df
 }
+
 
 make_target <- function(df, type="value", forecast=12) {
     # infer the future VMAX, i.e. the target variable that we are modeling
@@ -112,6 +123,18 @@ transform_back <- function(y, mu = y_mu, sd = y_sd) {
     
     y_tf <- (y + y_mu)*y_sd
     return(y_tf)
+}
+
+str_find <- function(substrs, str) {
+    # checks if str contains one of the strings in substrs (vector)
+    
+    contains <- FALSE
+    
+    for (s in substrs) {
+        contains <- contains || grepl(s, str, fixed=TRUE)
+    }
+    
+    return(contains)
 }
 
 replace_mismatch <- function(row, varname, repvalue=20) {

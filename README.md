@@ -69,7 +69,7 @@ for the project.
 **3rd Dec Update:**
 I executed all the model, but I just realized that the second one only run for 2000 iterations (convergence was reached, but it is running now for 4000).
 
-I merged all the three model executions to one file where the comparison is performed, I added it here, but I did not remove the individuals R files.
+I merged all the three model executions to one file where the comparison is performed, I added it here, but I did not remove the individuals R files. I also added the workspace to this repo, it is called my_workspace.RData, it has all the variables in model_comparison.R.
 
 The linear model is the worst, and the other ones are extremely similar, which means that some of the variables included in the so-called "nonlinear" data are not necessary, however I though that the "nonlinear" dataset contained the same as the the "basic" dataset + other variables, but two of the variables in the "basic" are not in the "nonlinear".
 

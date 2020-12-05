@@ -37,3 +37,31 @@ Sys.sleep(5)
 
 # Convergence diagnostics
 monitor(linear_model)
+
+
+## next model: hierarchical type
+shr <- x$SHRD
+x$SHRD <- NULL
+J = ncol(x)
+mu = rep(0, times=J+1)
+Sig <- matrix(0, J+1, J+1)
+diag(Sig) <- 10 # weak prior variances
+
+stan_data <- list(y = y,
+                  x = x,
+                  shr = shr,
+                  N = N,
+                  J = J,
+                  mu = mu,
+                  tau = Sig)
+
+hierarch_m <- rstan::stan_model(file = file.path(mod_path, "minimal.stan"))
+# needed to increase max. tree depth
+hierarch_model <- rstan::sampling(hierarch_m, data = stan_data, 
+                                control = list(max_treedepth = 15),
+                                iter=4000, seed = SEED)
+
+Sys.sleep(5)
+
+# Convergence diagnostics
+monitor(hierarch_model)

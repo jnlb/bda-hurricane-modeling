@@ -61,6 +61,10 @@ load_data <- function(type="basic", target="value", forecast=12,
         vars <- c("CSST", "SHRD")
         df <- df[c("ID", "TIME", vars, "VMAX")]
     }
+    else if (type=="minimal-B") {
+        vars <- c("CSST", "SHRD", "VMPI")
+        df <- df[c("ID", "TIME", vars, "VMAX")]
+    }
     else { # the "all" variables model is horrifyingly slow to sample
         df <- df[, !names(df) %in% c("X", "MSLP", "DELV")] # redundant/junk vars
         df <- df[,1:(ncol(df)-43)] # last batch of variables are junk
@@ -71,6 +75,8 @@ load_data <- function(type="basic", target="value", forecast=12,
     if (standardize) { # considered moving to a standardized scale
         y_mu <<- mean(df[,ncol(df)]) # need to save quantities needed for
         y_sd <<- sd(df[,ncol(df)]) # transforming back to natural scale
+        vmax_mu <<- mean(df[,ncol(df)-1])
+        vmax_sd <<- sd(df[,ncol(df)-1])
         df <- normalize(df)
     }
     
@@ -145,7 +151,7 @@ transform_back <- function(y, mu = y_mu, sd = y_sd) {
     # to the natural scale; 
     # this function returns Stan samples of VMAX to the natural scale
     
-    y_tf <- (y + y_mu)*y_sd
+    y_tf <- y*y_sd + y_mu
     return(y_tf)
 }
 

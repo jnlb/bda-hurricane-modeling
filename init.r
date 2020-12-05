@@ -116,7 +116,7 @@ get_testdata <- function(df, testid) { # df must contain "ID" column
     # extracts the data corresponding to one selected storm ID
     # this gets test data in a form such that it can be sent to Stan
     
-    temp <- ships[ships$ID == testid,]
+    temp <- df[df$ID == testid,]
     temp$ID <- NULL # no need to keep this at this point
     # not sure there is any point in this
     #temp <- temp[sapply(temp[,"TIME"], function(x) paste0(x,":00"))]

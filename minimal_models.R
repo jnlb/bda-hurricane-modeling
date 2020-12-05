@@ -53,6 +53,7 @@ diag(Sig) <- 10 # weak prior variances
 K <- nrow(test_data)
 coltypes_t <- sapply(test_data, class)
 x_test <- test_data[,coltypes_t != 'character']
+x_test[,ncol(x_test)] <- NULL
 shr_test <- x_test$SHRD
 x$SHRD <- NULL
 

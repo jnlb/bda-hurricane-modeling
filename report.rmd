@@ -1,0 +1,120 @@
+---
+title: "BDA Project: Hurricane forecasting in Stan"
+author: "José Miguel Ramírez & Jonas Lindblad"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Introduction
+
+Tropical cyclones (in the Atlantic known as *hurricanes*) are destructive storms that occur during the late summer and fall in the northern hemisphere's tropical region. The storms are usually classified by their wind intensity in the region known as the *eye wall*, i.e. the circular region around the storm center where the wind speeds are strongest. Highly intense hurricanes can cause extreme levels of flooding in coastal areas and destroy buildings and homes. Furthermore, the monetary damages and loss of lives seem to increase with an almost exponential character as a function of storm intensity. As such, good probabilistic forecasts of hurricane intensity are important for purposes of evacuating areas at risk, as well as an interesting scientific problem.
+
+Meteorologists forecast hurricane intensity changes with two classes of models: *dynamical* models, or *statistical* models. The dynamical models are based on systems of differential equations that are solved numerically with supercomputer clusters, while the statistical models are based on black-box machine learning methods or more basic statistical models. Rather bafflingly, one of the most successful models is a multiple linear regression model called Statistical Hurricane Intensity Prediction Scheme (SHIPS). Information about the SHIPS model and its datasets are available at the website: [SHIPS Development](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/index.asp). 
+
+The reason that a model as simple as SHIPS is still in operational use, is because of ongoing scientific challenges in understanding the complex causes of (as well as impediments to) intensification. It is well-known in the field that high sea temperatures in the tropical regions lead to dissipation and convection, which intensifies hurricane winds, while strong wind shear and surface drag causes weakening of the storms. However, knowledge of these factors have not lead to a complete solution to the problem and to some extent the issues may stem from the inherent complexity and uncertainty in current remote sensing technology.
+
+In this project, we develop models inspired by the SHIPS scheme and using the SHIPS developmental data. The idea is to develop a Bayesian, probabilistic, intensity forecast that could (in principle) be put into operational use as a competitor to currently active statistical hurricane models. Not being affiliated with a forecasting agency has its limits however, as it is important to note that the SHIPS model also uses information from the numerical weather forecasts run by the US government. We do not have access to the global forecast models, and as such are limited to creating a *synoptic* model, i.e. an intensity forecast based purely on information available at the current time and not using data from supercomputers that simulate the laws of physics.
+
+## Data
+
+```{r include=FALSE}
+# Execute init and data_load() here?
+## I think we don't have to include all our code in this file, they just want a pdf explaining the steps
+```
+
+This project uses the 'Developmental Data' from the SHIPS website: [SHIPS Developmental Data](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/developmental_data.asp). To be precise, we limit ourselves to the Atlantic version of the SHIPS data, and use the data from the 5-day SHIPS predictor file for the Atlantic. This data contains ~140 variables in 6-hourly time steps for every hurricane season 1982-2019. 
+
+### Description of the variables
+
+Describing all of the variables in the dataset is far outside the scope of this document, although a few important quantities should be known to the reader. Moreover, most of the variables are quite basic statistics computed by taking averages over certain regions (usually a circle or ring centered around the eye of the storm). The raw data used to compute the variables is a global grid discretization of the atmosphere, while the gridded discretization is created by statistically interpolating data from satellite remote sensing, weather balloons, weather stations, commercial/military aircraft, as well as weather buoys in the sea.
+
+**Include a picture example to go along with how the variables are computed?**
+
+**Maximum wind speed (VMAX):** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset). The DELTA12 variable corresponds to the value we want to predict: how the maximum wind speed will change in 12 hours.
+
+**Wind shear (SHRD):** Wind shear is the phenomenon where the wind direction and speed differs significantly depending on height. The SHIPS dataset contains several wind shear variables, since wind shear is known to be an important variable that can impact the development of a tropical storm. In regions with high wind shear, it can be very difficult for a storm to intensify since excess energy is required for the storm to maintain stability. Sometimes high wind shear can displace and 'rip apart' a storm, causing it to weaken and potentially dissipate. Wind shear quantities are averages computed from wind data in the grid discretization of the atmosphere.
+
+**Sea temperature (CSST):** The main energy source for tropical storms is the thermal energy in the sea, both the sea surface temperature and the deeper ocean heat content. The SHIPS dataset contains several variables representing the sea temperature, and these are well-known to correspond to storm intensification. The main physical process is that hot water evaporates, causing upward winds (convection) that lower the pressure inside the eye of the storm. This in turn causes winds to intensify as larger masses of the atmosphere get pushed towards the low-pressure point in the storm eye. These quantities are based on direct measurements from buoys and satellite remote sensing.
+
+
+```{r, include=FALSE}
+#I directly added the image, but if you prefer to use the r code that creates the image, that's fine with me
+
+path <- paste(dirname(getwd()), "/images/correlation_delta_small.png", sep="")
+pareto_linear_path <- paste(dirname(getwd()), "/images/pareto_linear.png", sep="")
+pareto_hierarchical_path <- paste(dirname(getwd()), "/images/pareto_hierarchical.png", sep="")
+
+```
+
+![Correlation plot of the variables we will include in the models.](`r path`)
+
+
+### Prior work with the data
+
+Although the data is publicly available with no restrictions, not much work using it can be found. This may be because of the lack of general interest in meteorology or possibly the poor state of the documentation. The authors of this report are not aware of any other work with this data apart from scientific publications by the American researchers involved in the SHIPS model development. The bulk of this research is available at the SHIPS website: [SHIPS Model References](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/references.asp).
+
+# Modelling
+
+Two different models have been used to study how the maximum wind speed will change in 12 hours: a linear non hierarchical model and a hierarchical one. In all cases we decided to use weakly informative priors: the means are equal to 0, and the variances are set to 10.
+
+The non hierarchical model can be mathematically summarized as:
+
+$\mu_{ij} \sim N(\alpha + X\beta, \sigma) $
+\begin{bmatrix} \alpha \\ \beta_0 \end{bmatrix} \sim N(\mu_0, \Sigma_0)
+$\mu_0 = $ \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}
+$\Sigma_0 = $ \begin{bmatrix} 10 0 0 \\ 0 10 0 \\ 0 0 10 \end{bmatrix}
+$\sigma \sim Inv-\chi^2(0.1) $
+
+And its Stan code is the following one:
+```{r}
+writeLines(readLines("models/linear.stan"))
+```
+
+We first run this model for 4000 iterations with 2000 as warm-up. 
+
+
+All $\hat{R}$ values approximated to 1.0, which means that we run enough iterations to reach convergence. If this was not the case and the ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008).
+
+
+
+The hierarchical model can be mathematically summarized as follows:
+
+$\mu_{ij} \sim N(\alpha + X\beta, \sigma) $
+\begin{bmatrix} \alpha \\ \beta_1 \\ \beta_2 \end{bmatrix} \sim N(\mu, \tau)
+$\mu = $ \begin{bmatrix} 0 \\ 0 \\ \mu_2  \end{bmatrix}
+$\mu_2 \sim N(\alpha_{shr} + SHR \beta_{shr}, \sigma_s)$
+$\alpha_{shr} \sim N(0,1)$
+$\beta_{shr} \sim N(0,1)$
+$\tau = $ \begin{bmatrix} 10 0 0 \\ 0 10 0 \\ 0 0 10 \end{bmatrix}
+$\sigma_s \sim Inv-\chi^2(0.1) $
+$\sigma \sim Inv-\chi^2(0.1) $
+
+And the Stan code of the model is the next one:
+```{r}
+writeLines(readLines("models/nonlinear.stan"))
+```
+
+This model was executed for 4000 iterations as well, where 2000 were used as warm-up. IN this case all the $\hat{R}$ values were approximated to 1.0 too, so convergence was correctly reached.
+
+## Models Comparison
+
+We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
+
+The PSIS-LOO elpd for the non hierarchical model is -1636.0, the effective number of parameters is 9 with looic of 3272.1 and Monte Carlo Standard Error of 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
+
+![K-values for the linear model.](`r pareto_linear_path`)
+
+The PSIS-LOO elpd for the hierarchical model is -1655.4, the effective number of parameters is 7.9 with looic of 3310.8 and Monte Carlo Standard Error approximating to 0.1. All the Pareto k estimates are lower than 0.7, with just one value above 0.5, as we can see in Figure. X+1, in this case, we can also consider the PSIS-LOO estimate as reliable.
+
+![K-values for the "basic" nonlinear model.](`r pareto_hierarchical_path`)
+
+
+The hierarchical model has a lower PSIS-LOO and a higher looic associated to it, but in order to better assess the differences between the models we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the non hierarchical model), so for this first model the value retrieved is 0, and for the hierarchical model it is -19.4, with 5.9 se difference. This difference in elpd and the scale relative to the standard error of this difference indicate that the best model according to PSIS-LOO would be the hierarchical model.
+

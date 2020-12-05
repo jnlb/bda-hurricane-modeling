@@ -65,3 +65,12 @@ Sys.sleep(5)
 
 # Convergence diagnostics
 monitor(hierarch_model)
+
+
+#Models Comparison
+
+
+loo_l <- loo(linear_model,  cores = 4)
+loo_h <- loo(hierarch_model,  cores = 4)
+library(loo)
+loo_compare(loo_l, loo_h)

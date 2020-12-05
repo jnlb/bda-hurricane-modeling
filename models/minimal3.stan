@@ -1,4 +1,4 @@
-// minimal model, skew normal behavior around regression line
+// minimal model, test with dependent variance
 data {
   int<lower=0> N; // nr of rows
   int<lower=0> J; // nr of x columns (same for test)
@@ -12,16 +12,16 @@ data {
 parameters {
   vector[J+1] theta;
   real < lower =0 > sigma;
-  real xi;
+  real< lower =0 > alpha; // weird regression parameter
 }
 model {
   // regression params
   theta ~ multi_normal(mu, tau);
   // skew-scale
-  xi ~ normal(0,1);
+  alpha ~ gamma(1,1);
   
   sigma ~ inv_chi_square(0.1);
-  y  ~ skew_normal(theta[1] + x*theta[2:J+1], sigma, xi);
+  y  ~ normal(theta[1] + x*theta[2:J+1], sigma + alpha*fabs(x[,J]));
 }
 
 generated quantities {
@@ -30,11 +30,11 @@ generated quantities {
   
   // log-likelihoods
   for (n in 1:N) {
-    log_lik[n] = skew_normal_lpdf(y[n] | theta[1] + x[n]*theta[2:J+1], sigma, xi);
+    log_lik[n] = normal_lpdf(y[n] | theta[1] + x[n]*theta[2:J+1], sigma + alpha*fabs(x[n,J]));
   }
   
   // predictions
   for (k in 1:K) { // predicted V may be either 'delta' or 'vmax' type
-    vpred[k] = skew_normal_rng(theta[1] + x_test[k]*theta[2:J+1], sigma, xi);
+    vpred[k] = normal_rng(theta[1] + x_test[k]*theta[2:J+1], sigma + alpha*fabs(x_test[k,J]));
   }
 }

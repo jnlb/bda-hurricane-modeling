@@ -1,6 +1,6 @@
 source('init.r')
 library(rstan)
-load_data(type="minimal-A", target="delta", 
+load_data(type="minimal-B", target="delta", 
           standardize=TRUE)
 SEED <- 123
 
@@ -42,7 +42,7 @@ Sys.sleep(5)
 monitor(linear_model)
 
 
-## next model: hierarchical type
+## next model: skewed regression type
 J = ncol(x)
 mu = rep(0, times=J+1)
 Sig <- matrix(0, J+1, J+1)
@@ -59,13 +59,13 @@ stan_data <- list(y = y,
                   N = N,
                   J = J,
                   K = K,
-                  x_test = x_test[,names(x_test) != names(x_test)[J]],
+                  x_test = x_test,
                   mu = mu,
                   tau = Sig)
 
-skew_m <- rstan::stan_model(file = file.path(mod_path, "minimal2.stan"))
+skew_m <- rstan::stan_model(file = file.path(mod_path, "minimal3.stan"))
 # needed to increase max. tree depth
-skew_model <- rstan::sampling(hierarch_m, data = stan_data, 
+skew_model <- rstan::sampling(skew_m, data = stan_data, 
                                 control = list(max_treedepth = 15),
                                 iter=4000, seed = SEED)
 

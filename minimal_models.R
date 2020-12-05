@@ -69,8 +69,22 @@ monitor(hierarch_model)
 
 #Models Comparison
 
-
 loo_l <- loo(linear_model,  cores = 4)
 loo_h <- loo(hierarch_model,  cores = 4)
+
+png(file="images/pareto_linear.png")
+plot(loo_l$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="PSIS_LOO Diagnostics (Basic + Linear Model)", pch=3)
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+dev.off()
+
+png(file="images/pareto_hierarchical.png")
+plot(loo_h$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="PSIS_LOO Diagnostics (Basic + Nonlinear Model)", pch=3)
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+dev.off()
+
 library(loo)
 loo_compare(loo_l, loo_h)

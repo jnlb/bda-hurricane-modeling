@@ -1,10 +1,13 @@
 // minimal model, hierarchical
 data {
-  int<lower=0> N;
-  int<lower=0> J;
+  int<lower=0> N; // nr of rows
+  int<lower=0> J; // nr of x columns (same for test)
+  int<lower=0> K; // observations for selected storm for predictions
+  matrix[K,J] x_test; // test data for selected test storm
   vector[N] y;
   matrix[N,J] x; // variables, excluding SHRD
   vector[N] shr; // wind shear
+  vector[K] shr_test; // wind shear in test data
   vector[J+1] mu; // required prior means 
   matrix[J+1, J+1] tau; // prior covariance matrix
 }
@@ -27,7 +30,22 @@ model {
 }
 
 generated quantities {
+  vector[K] vpred;
   vector[N] log_lik;
+  vector[J+1] mu_test;
+  vector[J+1] theta_test;
+  
+  // log-likelihoods
   for (n in 1:N) {
     log_lik[n] = normal_lpdf(y[n] | theta[1] + x[n]*theta[2:J+1], sigma);
-}}
+  }
+  
+  // predictions
+  mu_test = mu;
+  
+  for (k in 1:K) { // predicted V may be either 'delta' or 'vmax' type
+    mu_test[2] = normal_rng(theta_shr[1] + shr_test[k]*theta_shr[2], sigma_s);
+    theta_test = multi_normal_rng(mu_test, tau);
+    vpred[k] = normal_rng(theta_test[1] + x_test[k]*theta_test[2:J+1], sigma);
+  }
+}

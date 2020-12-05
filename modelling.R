@@ -12,9 +12,11 @@ ships <- complete(imp)
 
 
 # Modelling
-coltypes <- sapply(ships, class)
 
 y = ships[,ncol(ships)]
+ships[,ncol(ships)] <- NULL
+coltypes <- sapply(ships, class)
+
 x = ships[,coltypes!='character']
 sst = x[,"CSST"]
 shr = x[,"SHRD"]

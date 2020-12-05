@@ -15,9 +15,11 @@ imp <- mice(ships, m = 1);
 ships <- complete(imp)
 
 
-coltypes <- sapply(ships, class)
 
 y = ships[,ncol(ships)]
+ships[,ncol(ships)] <- NULL
+coltypes <- sapply(ships, class)
+
 x = ships[,coltypes!='character']
 N = nrow(ships)
 J = ncol(x)
@@ -45,9 +47,10 @@ stan_trace(linear_model)
 
 
 ## Basic data + Nonlinear model
-coltypes <- sapply(ships, class)
 
 y = ships[,ncol(ships)]
+ships[,ncol(ships)] <- NULL
+coltypes <- sapply(ships, class)
 x = ships[,coltypes!='character']
 sst = x[,"CSST"]
 shr = x[,"SHRD"]
@@ -95,10 +98,10 @@ imp <- mice(ships, m = 1);
 ships <- complete(imp)
 
 
-coltypes <- sapply(ships, class)
-
 y = ships[,ncol(ships)]
+ships[,ncol(ships)] <- NULL
 x = ships[,coltypes!='character']
+coltypes <- sapply(ships, class)
 sst = x[,"CSST"]
 shr = x[,"SHRD"]
 x_sst = x[,c("RHMD", "T150", "VVAV", "SHRD", "LAT.")]

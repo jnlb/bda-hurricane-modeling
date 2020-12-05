@@ -20,6 +20,9 @@ file_path <- file.path(data_path, filename)
 # default years to keep
 years <- c("2017", "2018", "2019")
 
+# default test storm: Hurricane Dorian from 2019
+test_id <- "AL052019"
+
 load_data <- function(type="basic", target="value", forecast=12, 
                       standardize=FALSE) {
     # simple start function; like calling data("bioassay") in BDA3
@@ -71,6 +74,9 @@ load_data <- function(type="basic", target="value", forecast=12,
         df <- normalize(df)
     }
     
+    # make test data first
+    test_data <<- get_testdata(df, test_id)
+    
     ships <<- df
 }
 
@@ -104,6 +110,24 @@ make_target <- function(df, type="value", forecast=12) {
     df$temp <- NULL
     
     return(df)
+}
+
+get_testdata <- function(df, testid) { # df must contain "ID" column
+    # extracts the data corresponding to one selected storm ID
+    # this gets test data in a form such that it can be sent to Stan
+    
+    temp <- ships[ships$ID == testid,]
+    temp$ID <- NULL # no need to keep this at this point
+    # not sure there is any point in this
+    #temp <- temp[sapply(temp[,"TIME"], function(x) paste0(x,":00"))]
+    
+    return(temp)
+}
+
+make_predictive_plot <- function(test_df, draws) {
+    # plot predictions from draws against empirical test data
+    
+    return(test_df)
 }
 
 normalize <- function(df) {

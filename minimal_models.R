@@ -12,9 +12,11 @@ ships <- complete(imp)
 
 # Sample from the Stan models
 # First a linear model
-coltypes <- sapply(ships, class)
 
 y = ships[,ncol(ships)]
+ships[,ncol(ships)] <- NULL ## ah, severe bug. somebody kill me now
+
+coltypes <- sapply(ships, class)
 x = ships[,coltypes!='character']
 N = nrow(ships)
 J = ncol(x)
@@ -47,11 +49,21 @@ mu = rep(0, times=J+1)
 Sig <- matrix(0, J+1, J+1)
 diag(Sig) <- 10 # weak prior variances
 
+# test data for Stan
+K <- nrow(test_data)
+coltypes_t <- sapply(test_data, class)
+x_test <- test_data[,coltypes_t != 'character']
+shr_test <- x_test$SHRD
+x$SHRD <- NULL
+
 stan_data <- list(y = y,
                   x = x,
                   shr = shr,
                   N = N,
                   J = J,
+                  K = K,
+                  x_test = x_test[,names(x_test) != names(x_test)[J]],
+                  shr_test = shr_test,
                   mu = mu,
                   tau = Sig)
 

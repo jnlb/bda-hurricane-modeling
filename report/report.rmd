@@ -43,15 +43,13 @@ Describing all of the variables in the dataset is far outside the scope of this 
 
 **Sea temperature (CSST):** The main energy source for tropical storms is the thermal energy in the sea, both the sea surface temperature and the deeper ocean heat content. The SHIPS dataset contains several variables representing the sea temperature, and these are well-known to correspond to storm intensification. The main physical process is that hot water evaporates, causing upward winds (convection) that lower the pressure inside the eye of the storm. This in turn causes winds to intensify as larger masses of the atmosphere get pushed towards the low-pressure point in the storm eye. These quantities are based on direct measurements from buoys and satellite remote sensing.
 
-From the initial 140 variables included in our data, by removing the variables with too many NAs, using our prior knowledge, and observing how the variables correlate, we decided to study two subsets of our data, one small subset of 10 variables that we will be calling "small" from now on, and another including 15 variables that we will be calling "large".
 
 ```{r, include=FALSE}
 #I directly added the image, but if you prefer to use the r code that creates the image, that's fine with me
 
 path <- paste(dirname(getwd()), "/images/correlation_delta_small.png", sep="")
 pareto_linear_path <- paste(dirname(getwd()), "/images/pareto_linear.png", sep="")
-pareto_basic_path <- paste(dirname(getwd()), "/images/pareto_basic_nonlinear.png", sep="")
-pareto_nonlinear_path <- paste(dirname(getwd()), "/images/pareto_nonlinear_nonlinear.png", sep="")
+pareto_hierarchical_path <- paste(dirname(getwd()), "/images/pareto_hierarchical.png", sep="")
 
 ```
 
@@ -64,36 +62,38 @@ Although the data is publicly available with no restrictions, not much work usin
 
 # Modelling
 
-Three different models have been used to study how the maximum wind speed will change in 12 days. The first one is a linear hierarchical model with a small subset of variables ("basic"), whereas the other two are nonlinear hierarchical models using different subsets of variables: the "basic" subset, and the "nonlinear" set. In all cases we decided to use weakly informative priors: the means are equal to 0, and the variances are set to 10.
+Two different models have been used to study how the maximum wind speed will change in 12 days: a linear non hierarchical model and a hierarchical one. In all cases we decided to use weakly informative priors: the means are equal to 0, and the variances are set to 10.
 
-The code for the linear hierarchical model is the following one:
+The code for the linear non hierarchical model is the following one:
 ```{r}
 writeLines(readLines("models/linear.stan"))
 ```
 
-We first run this model for 4000 iterations with 2000 as warm-up using the "basic" dataset. The largest $\hat{R}$ obtained was 1.1, and if this ratio is higher than 1, it means that the chains are not sampling from the same part of the parameter space and we need either to increase the number of iterations or to edit the proposal distribution. We increased the number of iterations to 5000 and now all the $\hat{R}$ values approximated to 1, which means that we run enough iterations to reach convergence. We used the definition of $\hat{R}$ that can be found [here](https://arxiv.org/abs/1903.08008).
+We first run this model for 4000 iterations with 2000 as warm-up. 
 
-The nonlinear hierarchical model is the next one:
+
+All $\hat{R}$ values approximated to 1.0, which means that we run enough iterations to reach convergence. If this was not the case and the ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008).
+
+
+
+The Stan code for the hierarchical model is the next one:
 ```{r}
 writeLines(readLines("models/nonlinear.stan"))
 ```
 
-This model was executed twice, the first time we used the "basic" dataset for 2000 iterations with 1000 as warm-up, because it takes too long to run, but this number of iterations was enough to reach convergence: all $\hat{R}$ values were approximated to 1.0. For the second execution, the "nonlinear" dataset was used for 4000 iterations (2000 as warm-up) and convergence was also reached.
+This model was executed for 4000 iterations as well, where 2000 were used as warm-up. IN this case all the $\hat{R}$ values were approximated to 1.0 too, so convergence was correctly reached.
 
 ## Models Comparison
 
-We assessed the models using leave-one-out cross-validation (LOO-CV) for further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
+We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
-The PSIS-LOO elpd for the linear model is 115291.5, the effective number of parameters is 0.9 with looic of -230583.1 and Monte Carlo Standard Error of 0.1. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
+The PSIS-LOO elpd for the non hierarchical model is 8104.3, the effective number of parameters is 1.1 with looic of -16208.6 and Monte Carlo Standard Error of 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
 
 ![K-values for the linear model.](`r pareto_linear_path`)
 
-The PSIS-LOO elpd for the nonlinear model using the "basic" dataset is -17576.5, the effective number of parameters is 7.1 with looic of 35153.0 and Monte Carlo Standard Error approximating to 0.0. All the Pareto k estimates are lower than 0.5 as well, as we can see in Figure. X+1, so the PSIS-LOO estimate can be considered as reliable.
+The PSIS-LOO elpd for the hierarchical model is 8103.8, the effective number of parameters is 1.1 with looic of -16207.5 and Monte Carlo Standard Error approximating to 0.0. All the Pareto k estimates are lower than 0.5 as well, as we can see in Figure. X+1, so the PSIS-LOO estimate can be considered as reliable.
 
-![K-values for the "basic" nonlinear model.](`r pareto_basic_path`)
+![K-values for the "basic" nonlinear model.](`r pareto_hierarchical_path`)
 
-The PSIS-LOO elpd for the nonlinear model with the "nonlinear" data is -17576.8, the effective number of parameters is 7.6 with looic of 35153.6 and Monte Carlo Standard Error approximating to 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X+2, so the PSIS-LOO estimate can be considered to be reliable.
 
-![K-values for the "nonlinear" nonlinear model.](`r pareto_nonlinear_path`)
-
-The nonlinear model using the "nonlinear" data has the lowest PSIS-LOO and the highest looic associated to it, extremely similar values to the nonlinear model using the "basic" data. But in order to assess the differences between the models we have used the function \textit{loo_compare}. When elpd_diff is 0 and se_diff is 0 for the lineal model, they are -132868.3 and 176.8 for the "basic" nonlinear model, and -132868.4 and 176.8 for the "nonlinear" nonlinear model. This means that the linear model is the worst one and that both "nonlinear" models are similar enough, so the extra variables added to the "nonlinear" model do not include new extra information.
+The hierarchical model has a lower PSIS-LOO and a higher looic associated to it, but it is extremely similar to the ones from the non hierarchical model. In order to better assess the differences between the models we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the non hierarchical model), so for this first model th evalue retrieved is 0, and it is -0.6 for the hierarchical model, in both cases the difference in se is 0. This means that there is no practical difference between the two models for this data.

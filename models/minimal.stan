@@ -1,4 +1,5 @@
 // minimal model, hierarchical
+// COMPLETE SHIT; DO NOT USE
 data {
   int<lower=0> N; // nr of rows
   int<lower=0> J; // nr of x columns (same for test)

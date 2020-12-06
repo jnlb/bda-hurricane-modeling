@@ -27,7 +27,7 @@ The reason that a model as simple as SHIPS is still in operational use, is becau
 
 In this project, we develop models inspired by the SHIPS scheme and using the SHIPS developmental data. The idea is to develop a Bayesian, probabilistic, intensity forecast that could (in principle) be put into operational use as a competitor to currently active statistical hurricane models. Not being affiliated with a forecasting agency has its limits however, as it is important to note that the SHIPS model also uses information from the numerical weather forecasts run by the US government. We do not have access to the global forecast models, and as such are limited to creating a *synoptic* model, i.e. an intensity forecast based purely on information available at the current time and not using data from supercomputers that simulate the laws of physics.
 
-## Data
+# Data Description
 
 ```{r include=FALSE}
 # Execute init and data_load() here?
@@ -39,8 +39,6 @@ This project uses the 'Developmental Data' from the SHIPS website: [SHIPS Develo
 ### Description of the variables
 
 Describing all of the variables in the dataset is far outside the scope of this document, although a few important quantities should be known to the reader. Moreover, most of the variables are quite basic statistics computed by taking averages over certain regions (usually a circle or ring centered around the eye of the storm). The raw data used to compute the variables is a global grid discretization of the atmosphere, while the gridded discretization is created by statistically interpolating data from satellite remote sensing, weather balloons, weather stations, commercial/military aircraft, as well as weather buoys in the sea.
-
-**Include a picture example to go along with how the variables are computed?**
 
 **Maximum wind speed (VMAX):** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset). The **DELTA12** variable corresponds to the value we want to predict: how the maximum wind speed will change in 12 hours.
 
@@ -121,11 +119,11 @@ The Stan code of this model can be found in Appendix 3. To execute the model we 
 
 We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package _loo_ for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
-The PSIS-LOO elpd for the basic linear model using data "A" is -1636.0 with 9 as effective number of parameters (p_loo), looic of 3272.1 and Monte Carlo Standard Error (MCSE) of 0.0. For data "B", the PSIS-LOO elpd is -1633.6 with p_loo = 10, looic = 3267.2 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1608.6, with p_loo = 13.1, looic = 3217.2 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. X. This means that the three PSIS-LOO estimates can be considered to be reliable.
+The PSIS-LOO elpd for the basic linear model using data "A" is -1636.0 with 9 as effective number of parameters (p_loo), looic of 3272.1 and Monte Carlo Standard Error (MCSE) of 0.0. For data "B", the PSIS-LOO elpd is -1633.6 with p_loo = 10, looic = 3267.2 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1608.6, with p_loo = 13.1, looic = 3217.2 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. 2. This means that the three PSIS-LOO estimates can be considered to be reliable.
 
 ![PSIS-LOO diagnosis for the linear model.](`r pareto_linear_path`){width=70%}
 
-The model with dataset "C" has the highest PSIS-LOO and the lowest looic associated to it, but in order to better assess the differences between the datasets we have used the function _loo_compare_. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the "C" model). As we can see in Table X, the differences in elpd and the scale relative to the standard error of these differences indicate that the best dataset for this model according to PSIS-LOO would be the dataset "C".
+The model with dataset "C" has the highest PSIS-LOO and the lowest looic associated to it, but in order to better assess the differences between the datasets we have used the function _loo_compare_. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the "C" model). As we can see in the table below, the differences in elpd and the scale relative to the standard error of these differences indicate that the best dataset for this model according to PSIS-LOO would be the dataset "C".
 
 | variable set | **elpd_diff** | **se_diff** |
 | :----------: | :-----------: | :---------: |
@@ -133,13 +131,13 @@ The model with dataset "C" has the highest PSIS-LOO and the lowest looic associa
 | _B_ | -25.0 | 6.5 |
 | _A_ | -27.4 | 6.3 | 
 
-The PSIS-LOO elpd for the skewed-regression model using data "A" is -1608.1 with p_loo = 9.6, looic = 3272.1, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1602.5 with p_loo = 10.4, looic = 3205.1 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1579.4, with p_loo = 13.3, looic = 3158.7 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. X. This means that the three PSIS-LOO estimates can be considered to be reliable.
+The PSIS-LOO elpd for the skewed-regression model using data "A" is -1608.1 with p_loo = 9.6, looic = 3272.1, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1602.5 with p_loo = 10.4, looic = 3205.1 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1579.4, with p_loo = 13.3, looic = 3158.7 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. 3. This means that the three PSIS-LOO estimates can be considered to be reliable.
 
 ![PSIS-LOO diagnosis for the skewed model.](`r pareto_skew_path`){width=70%}
 
 \newpage
 
-Using _loo_compare_ we can observe that the best dataset for this model would be again dataset "C" (Table X).
+Using _loo_compare_ we can observe in the table below that the best dataset for this model would be again dataset "C".
 
 | variable set | **elpd_diff** | **se_diff** |
 | :----------: | :-----------: | :---------: |
@@ -147,11 +145,11 @@ Using _loo_compare_ we can observe that the best dataset for this model would be
 | _B_ | -23.2 | 6.2 | 
 | _A_ | -28.7 | 6.2 |   
 
-The PSIS-LOO elpd for the regression with changing variance using data "A" is -1440.2 with p_loo = 7.3, looic = 2880.5, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1435.8 with p_loo = 8.3, looic = 2871.5 and MCSE approximated to 0.0. For the last dataset "C", the elpd_loo is -1403.1, with p_loo = 12.0, looic = 2806.2 and MCSE = 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the three PSIS-LOO estimates can be considered to be reliable.
+The PSIS-LOO elpd for the regression with changing variance using data "A" is -1440.2 with p_loo = 7.3, looic = 2880.5, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1435.8 with p_loo = 8.3, looic = 2871.5 and MCSE approximated to 0.0. For the last dataset "C", the elpd_loo is -1403.1, with p_loo = 12.0, looic = 2806.2 and MCSE = 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. 4, which means that the three PSIS-LOO estimates can be considered to be reliable.
 
 ![PSIS-LOO diagnosis for the variance model.](`r pareto_variance_path`){width=70%}
 
-Using again the function _loo_compare_ we can see that the best dataset for this model would be again dataset "C" (Table X).
+Using again the function _loo_compare_ we can see that in the table below that the best dataset for this model would be again dataset "C".
 
 | variable set | **elpd_diff** | **se_diff** |
 | :----------: | :-----------: | :---------: |
@@ -169,7 +167,7 @@ We have seen that the best dataset for all of our Stan models is dataset "C". If
 
 \newpage
 
-# Evaluation and potential improvements
+# Evaluation and Potential Improvements
 
 The best model - the variance regression model - was used to generate forecasts for Hurricane Dorian - an especially powerful Hurricane that hit the Bahamas in 2019. See the image below for a comparison between the model predictions and Dorian's empirical intensity development.
 
@@ -185,7 +183,7 @@ Another improvement idea would be to include a time series component in the regr
 
 \newpage
 
-# Conclusions and discussion
+# Conclusions and Discussion
 
 Hurricane intensity forecasting is an interesting problem which still includes unsolved scientific challenges. We have demonstrated that the existing SHIPS architecture could potentially be improved with some simple changes to the linear regression design and that probabilistic information created by Stan can provide useful information. Despite this, computational challenges may emerge if larger observation sets or variable selections are taken. The comparative efficiency of computing a simple regression point estimate is probably one of the reasons that the SHIPS model is so useful.
 
@@ -200,18 +198,22 @@ We have learned several things about hurricane forecasting during this project. 
 
 ## Appendix 1: Stan code for the linear regression model
 
-```{r}
+```{r, echo=FALSE}
 writeLines(readLines("models/linear.stan"))
 ```
 
+\newpage
+
 ## Appendix 2: Stan code for the Skew-regression model
 
-```{r}
+```{r, echo=FALSE}
 writeLines(readLines("models/minimal2.stan"))
 ```
 
+\newpage
+
 ## Appendix 3: Stan code for the regression with changing variance
 
-```{r}
+```{r, echo=FALSE}
 writeLines(readLines("models/minimal3.stan"))
 ```

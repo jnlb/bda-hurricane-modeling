@@ -151,7 +151,7 @@ transform_back <- function(y, mu = y_mu, sd = y_sd) {
     # to the natural scale; 
     # this function returns Stan samples of VMAX to the natural scale
     
-    y_tf <- y*y_sd + y_mu
+    y_tf <- y*sd + mu
     return(y_tf)
 }
 

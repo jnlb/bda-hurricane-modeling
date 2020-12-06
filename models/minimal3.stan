@@ -17,11 +17,11 @@ parameters {
 model {
   // regression params
   theta ~ multi_normal(mu, tau);
-  // skew-scale
+  // variance regression
   alpha ~ gamma(1,1);
   
   sigma ~ inv_chi_square(0.1);
-  y  ~ normal(theta[1] + x*theta[2:J+1], sigma + alpha*fabs(x[,J]));
+  y  ~ normal(theta[1] + x*theta[2:J+1], sigma + exp(alpha*x[,J]));
 }
 
 generated quantities {
@@ -30,11 +30,13 @@ generated quantities {
   
   // log-likelihoods
   for (n in 1:N) {
-    log_lik[n] = normal_lpdf(y[n] | theta[1] + x[n]*theta[2:J+1], sigma + alpha*fabs(x[n,J]));
+    log_lik[n] = normal_lpdf(y[n] | theta[1] + x[n]*theta[2:J+1], 
+        sigma + alpha*fabs(x[n,J]));
   }
   
   // predictions
   for (k in 1:K) { // predicted V may be either 'delta' or 'vmax' type
-    vpred[k] = normal_rng(theta[1] + x_test[k]*theta[2:J+1], sigma + alpha*fabs(x_test[k,J]));
+    vpred[k] = normal_rng(theta[1] + x_test[k]*theta[2:J+1], 
+        sigma + alpha*fabs(x_test[k,J]+1));
   }
 }

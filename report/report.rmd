@@ -9,7 +9,11 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '..')
+```
 
+```{r}
+source("init.r", local = knitr::knit_global())
 ```
 
 # Introduction
@@ -37,7 +41,7 @@ Describing all of the variables in the dataset is far outside the scope of this 
 
 **Include a picture example to go along with how the variables are computed?**
 
-**Maximum wind speed (VMAX):** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset). The DELTA12 variable corresponds to the value we want to predict: how the maximum wind speed will change in 12 days.
+**Maximum wind speed (VMAX):** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset). The DELTA12 variable corresponds to the value we want to predict: how the maximum wind speed will change in 12 hours.
 
 **Wind shear (SHRD):** Wind shear is the phenomenon where the wind direction and speed differs significantly depending on height. The SHIPS dataset contains several wind shear variables, since wind shear is known to be an important variable that can impact the development of a tropical storm. In regions with high wind shear, it can be very difficult for a storm to intensify since excess energy is required for the storm to maintain stability. Sometimes high wind shear can displace and 'rip apart' a storm, causing it to weaken and potentially dissipate. Wind shear quantities are averages computed from wind data in the grid discretization of the atmosphere.
 
@@ -47,9 +51,9 @@ Describing all of the variables in the dataset is far outside the scope of this 
 ```{r, include=FALSE}
 #I directly added the image, but if you prefer to use the r code that creates the image, that's fine with me
 
-path <- paste(dirname(getwd()), "/images/correlation_delta_small.png", sep="")
-pareto_linear_path <- paste(dirname(getwd()), "/images/pareto_linear.png", sep="")
-pareto_hierarchical_path <- paste(dirname(getwd()), "/images/pareto_hierarchical.png", sep="")
+path <- file.path(getwd(), img_path, "corrplot_delta_small.png")
+pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
+pareto_hierarchical_path <- file.path(getwd(), img_path, "pareto_hierarchical.png")
 
 ```
 
@@ -62,9 +66,52 @@ Although the data is publicly available with no restrictions, not much work usin
 
 # Modelling
 
-Two different models have been used to study how the maximum wind speed will change in 12 days: a linear non hierarchical model and a hierarchical one. In all cases we decided to use weakly informative priors: the means are equal to 0, and the variances are set to 10.
+In this project we studied three different model structures with different variable selections. Drawing inspiration from the US government SHIPS model, all of our models are some variation of linear regression. 
 
-The code for the linear non hierarchical model is the following one:
+## Description of the models
+
+### Linear regression
+
+The first model is the simplest possible case - just a linear regression model. The mathematical statement of the model is as follows, where we let $N$ denote the number of regression parameters.
+
+$$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma), \ i=1,\dots,r, $$
+where we let $X_i$ denote the $i$:th row of the data, $\beta_{N-1}$ is an $N-1$-dimensional parameter vector, and $r$ is the number of observations (rows) in the data. The inference is done on the parameters $\alpha , \beta, \sigma.$ They are given the following (weak) prior distributions.
+
+$$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) .$$
+
+### Skew-regression
+
+The second model is variation of the first, where instead of a normal distribution around the regression line, a skew-normal distribution is used. This probability distribution has different properties, making computation a bit less efficient, but there are scientific reasons to believe that a skew towards higher intensity changes would be a better fit. The model is summarized in mathematical language as follows.
+
+$$ y_{i} \sim \textrm{SkewNormal}(\alpha + X_i \cdot\beta_{N-1}, \sigma, \psi), \ \ i=1,\dots,r, $$
+where we use the same conventions as in the linear model. The priors of the parameters are given below.
+$$
+\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) , \ \psi_0 \sim \mathcal{N}(0,1) .$$
+
+### Regression with changing variance
+
+This is another variation of the linear regression model. In this model there is also a regression dependence on the wind intensity $V_{max}.$ This somewhat justified, since very extreme values of $V_{max}$ lead to volatile situations where the evolution of the storm can be difficult to predict even for the best forecasting agencies. There are also relatively few cases of high $V_{max}$ since every storm starts out weak, but only a few evolve to be high-category hurricanes. 
+
+This model is declared in mathematical notation as follows:
+
+$$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma + \exp(\gamma\cdot V_{max,i})), \ i=1,\dots,r, $$
+where, again, we use the same notation as before and let $V_{max,i}$ denote the $V_{max}$-value of the $i$:th row. Note the exponential function in the variance section; the exponential statement is used partly to ensure that the variance remains positive, and partly because it has been a good fit in preliminary analysis. The parameters are given the priors listed below.
+
+$$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \ \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}), \ \gamma_0 \sim \Gamma(1,1) .$$
+
+## Old models (rewrite/remove ?)
+
+Two different models have been used to study how the maximum wind speed will change in 12 hours: a linear non hierarchical model and a hierarchical one. In all cases we decided to use weakly informative priors: the means are equal to 0, and the variances are set to 10.
+
+The non hierarchical model can be mathematically summarized as:
+
+$$ \mu_{ij} \sim N(\alpha + X\beta, \sigma), \\
+\begin{bmatrix} \alpha \\ \beta_0 \end{bmatrix} \sim N(\mu_0, \Sigma_0) $$
+$$\mu_0 =  \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix} , \
+\Sigma_0 =  \begin{bmatrix} 10 & 0 & 0 \\ 0 & 10 & 0 \\ 0 & 0 & 10 \end{bmatrix}, \ \
+\sigma \sim Inv-\chi^2(\tfrac{1}{10}) .$$
+
+And its Stan code is the following one:
 ```{r}
 writeLines(readLines("models/linear.stan"))
 ```
@@ -76,7 +123,19 @@ All $\hat{R}$ values approximated to 1.0, which means that we run enough iterati
 
 
 
-The Stan code for the hierarchical model is the next one:
+The hierarchical model can be mathematically summarized as follows:
+
+$$\mu_{ij} \sim N(\alpha + X\beta, \sigma) , \ 
+\begin{bmatrix} \alpha \\ \beta_1 \\ \beta_2 \end{bmatrix} \sim N(\mu, \tau),$$
+$$\mu = \begin{bmatrix} 0 \\ 0 \\ \mu_2  \end{bmatrix}, \
+\mu_2 \sim N(\alpha_{shr} + \textrm{SHRD} \beta_{shr}, \sigma_s),$$
+$$\alpha_{shr} \sim N(0,1), \
+\beta_{shr} \sim N(0,1), \
+\tau =  \begin{bmatrix} 10 & 0 & 0 \\ 0 & 10 & 0 \\ 0 & 0 & 10 \end{bmatrix} ,$$
+$$\sigma_s \sim Inv-\chi^2(0.1) , \ 
+\sigma \sim Inv-\chi^2(0.1) .$$
+
+And the Stan code of the model is the next one:
 ```{r}
 writeLines(readLines("models/nonlinear.stan"))
 ```
@@ -87,13 +146,14 @@ This model was executed for 4000 iterations as well, where 2000 were used as war
 
 We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
-The PSIS-LOO elpd for the non hierarchical model is 8104.3, the effective number of parameters is 1.1 with looic of -16208.6 and Monte Carlo Standard Error of 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
+The PSIS-LOO elpd for the non hierarchical model is -1636.0, the effective number of parameters is 9 with looic of 3272.1 and Monte Carlo Standard Error of 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
 
 ![K-values for the linear model.](`r pareto_linear_path`)
 
-The PSIS-LOO elpd for the hierarchical model is 8103.8, the effective number of parameters is 1.1 with looic of -16207.5 and Monte Carlo Standard Error approximating to 0.0. All the Pareto k estimates are lower than 0.5 as well, as we can see in Figure. X+1, so the PSIS-LOO estimate can be considered as reliable.
+The PSIS-LOO elpd for the hierarchical model is -1655.4, the effective number of parameters is 7.9 with looic of 3310.8 and Monte Carlo Standard Error approximating to 0.1. All the Pareto k estimates are lower than 0.7, with just one value above 0.5, as we can see in Figure. X+1, in this case, we can also consider the PSIS-LOO estimate as reliable.
 
 ![K-values for the "basic" nonlinear model.](`r pareto_hierarchical_path`)
 
 
-The hierarchical model has a lower PSIS-LOO and a higher looic associated to it, but it is extremely similar to the ones from the non hierarchical model. In order to better assess the differences between the models we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the non hierarchical model), so for this first model th evalue retrieved is 0, and it is -0.6 for the hierarchical model, in both cases the difference in se is 0. This means that there is no practical difference between the two models for this data.
+The hierarchical model has a lower PSIS-LOO and a higher looic associated to it, but in order to better assess the differences between the models we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the non hierarchical model), so for this first model the value retrieved is 0, and for the hierarchical model it is -19.4, with 5.9 se difference. This difference in elpd and the scale relative to the standard error of this difference indicate that the best model according to PSIS-LOO would be the hierarchical model.
+

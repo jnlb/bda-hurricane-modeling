@@ -42,13 +42,19 @@ Describing all of the variables in the dataset is far outside the scope of this 
 
 **Include a picture example to go along with how the variables are computed?**
 
-**Maximum wind speed (VMAX):** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset). The DELTA12 variable corresponds to the value we want to predict: how the maximum wind speed will change in 12 hours.
+**Maximum wind speed (VMAX):** This is the current maximum wind speed (in knots) in the eye wall of the hurricane, at ~100 meters above surface. Actually, there may be gusts and turbulences that are short-lived winds surpassing this wind speed, but it has been found that the maximum ~10 minute sustained winds in the eye wall is simpler to measure and predicts maximum gusts and storm damages best. In the Atlantic region this variable is measured by US military aircraft that drop sondes inside the eye wall of the storm. In case there is no scheduled flight mission to a hurricane, the maximum wind speed is instead inferred using statistics and satellite observations. Naturally, this is an estimate in either case, but the standard error is in fact significantly lower when dropsonde measurements are used. In all official US government data this quantity is rounded to the nearest multiple of five (this includes the SHIPS dataset). The **DELTA12** variable corresponds to the value we want to predict: how the maximum wind speed will change in 12 hours.
 
 **Wind shear (SHRD):** Wind shear is the phenomenon where the wind direction and speed differs significantly depending on height. The SHIPS dataset contains several wind shear variables, since wind shear is known to be an important variable that can impact the development of a tropical storm. In regions with high wind shear, it can be very difficult for a storm to intensify since excess energy is required for the storm to maintain stability. Sometimes high wind shear can displace and 'rip apart' a storm, causing it to weaken and potentially dissipate. Wind shear quantities are averages computed from wind data in the grid discretization of the atmosphere.
 
 **Sea temperature (CSST):** The main energy source for tropical storms is the thermal energy in the sea, both the sea surface temperature and the deeper ocean heat content. The SHIPS dataset contains several variables representing the sea temperature, and these are well-known to correspond to storm intensification. The main physical process is that hot water evaporates, causing upward winds (convection) that lower the pressure inside the eye of the storm. This in turn causes winds to intensify as larger masses of the atmosphere get pushed towards the low-pressure point in the storm eye. These quantities are based on direct measurements from buoys and satellite remote sensing.
 
-We will also be studying the effect of different subsets of the full SHIPS set of variables. The first data set will only contain the wind shear (SHRD) and the sea temperature (CSST), we will call from now on to this dataset as "B". We will also study a dataset containing the same variables as in "A" plus an extra variable: the maximum potential intensity (VMPI), we will be refering to this dataset as "B". Finally, we will also test a larger dataset with the variables SHRD, CSST, VMPI, RHLO, and T200, we will refer to this dataset as "C".
+The rest of our variables of interest are:
+
+* **RHLO**: relative humidity at low altitude (~850 mb)
+* **T200**: air temperature at 200 mb
+* **VMPI**: a variable from Potential Intensity theory; theoretically representing the maximum physically possible wind intensity that the storm could achieve in ideal conditions
+
+We will be studying the effect of different subsets of the full SHIPS set of variables. The first data set will only contain the wind shear (SHRD) and the sea temperature (CSST), we will call from now on to this dataset as "A". We will also study a dataset containing the same variables as in "A" plus an extra variable: the maximum potential intensity (VMPI), we will be refering to this dataset as "B". Finally, we will also test a larger dataset with the variables SHRD, CSST, VMPI, RHLO, and T200, we will refer to this dataset as "C". The correlations of all these variables with our target (DELTA12) can be observed in Figure 1.
 
 ```{r, include=FALSE}
 #I directly added the image, but if you prefer to use the r code that creates the image, that's fine with me
@@ -67,21 +73,7 @@ dorian_eval_path <- file.path(getwd(), img_path, "proto_eval_dorian.png")
 
 Although the data is publicly available with no restrictions, not much work using it can be found. This may be because of the lack of general interest in meteorology or possibly the poor state of the documentation. The authors of this report are not aware of any other work with this data apart from scientific publications by the American researchers involved in the SHIPS model development. The bulk of this research is available at the SHIPS website: [SHIPS Model References](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/references.asp).
 
-### Brief explanation of chosen variables
 
-* **INCV**: intensity change from last time period to current time
-* **LAT/LON**: latitude/longitude coordinates
-* **CSST**: (climatological) sea surface temperature
-* **U200**: longitudal component of jet winds at 200 mb height
-* **RHLO**: relative humidity at low altitude (~850 mb)
-* **RHMD**: relative humidity at medium altitude (~500 mb)
-* **REFC**: rotational eddy flux convergence (don't ask)
-* **G250**: temperature gradient caused by the storm, at 250 mb
-* **T150**: air temperature at 150 mb
-* **T200**: air temperature at 200 mb
-* **SHRD**: wind shear between 850 mb and 200 mb heights
-* **VVAV**: the vertical wind near sea surface (convection)
-* **VMPI**: a variable from Potential Intensity theory; theoretically representing the maximum physically possible wind intensity that the storm could achieve in ideal conditions
 
 \newpage
 
@@ -99,12 +91,7 @@ $$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma), \ i=1,\dots,r,
 where we let $X_i$ denote the $i$:th row of the data, $\beta_{N-1}$ is an $N-1$-dimensional parameter vector, and $r$ is the number of observations (rows) in the data. The inference is done on the parameters $\alpha , \beta, \sigma.$ They are given the following (weak) prior distributions.
 
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) .$$
-The Stan code for this model is the following one:
-```{r}
-writeLines(readLines("models/linear.stan"))
-```
-
-We run this model with 4 chains for 4000 iterations using 2000 as warm-up. We used the datasets "A", "B", and "C", and for all of them, the ESS is always higher than 100, and the $\hat{R}$ values approximated to 1.0 for each parameter, which means that we run enough iterations to reach convergence. If this was not the case and the $\hat{R}$ ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008). 
+The Stan code for this model can be found in Appendix 1. We run the model with 4 chains for 4000 iterations using 2000 as warm-up. We used the datasets "A", "B", and "C", and for all of them, the ESS is always higher than 100, and the $\hat{R}$ values approximated to 1.0 for each parameter, which means that we run enough iterations to reach convergence. If this was not the case and the $\hat{R}$ ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008). 
 
 
 ### Skew-regression
@@ -114,7 +101,7 @@ The second model is a variation of the first, where instead of a normal distribu
 $$ y_{i} \sim \textrm{SkewNormal}(\alpha + X_i \cdot\beta_{N-1}, \sigma, \psi), \ \ i=1,\dots,r, $$
 where we use the same conventions as in the linear model. The priors of the parameters are given below.
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) , \ \psi_0 \sim \mathcal{N}(0,1) .$$
-We run this model for the same number of iterations as before: 4000 using with 2000 as warm-up, the same number of chains: 4, and the same datasets: "A", "B", and "C". But in this case we also increased the maximum tree depth to 15. Convergence was also reached in all these cases, as all $\hat{R}$ values approximated to 1.0 and all ESS were higher than 100.
+The Stan code of this model can be found in Appendix 2. We run the model for the same number of iterations as before: 4000 using with 2000 as warm-up, the same number of chains: 4, and the same datasets: "A", "B", and "C". But in this case we also increased the maximum tree depth to 15. Convergence was also reached in all these cases, as all $\hat{R}$ values approximated to 1.0 and all ESS were higher than 100.
 
 
 ### Regression with changing variance
@@ -127,10 +114,10 @@ $$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma + \gamma\vert V_
 where, again, we use the same notation as before and let $V_{max,i}$ denote the $V_{max}$-value of the $i$:th row. Note the absolute value function in the variance section; this statement is used to ensure that the variance remains positive. The parameters are given the priors listed below.
 
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \ \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}), \ \gamma_0 \sim \Gamma(1,1) .$$
-To execute this model we used 4 chains, 4000 iterations with half of them as warm-up and a maximum tree depth of 15. We checked the $\hat{R}$ values for the three variable combinations ("A", "B", and "C"), and all of them approximated to 1.0, so we can state that the chains converged in the three cases. Moreover ESS is always high enough.
+The Stan code of this model can be found in Appendix 3. To execute the model we used 4 chains, 4000 iterations with half of them as warm-up and a maximum tree depth of 15. We checked the $\hat{R}$ values for the three variable combinations ("A", "B", and "C"), and all of them approximated to 1.0, so we can state that the chains converged in the three cases. Moreover ESS is always high enough.
 
 
-## Model Comparison
+## Models Comparison
 
 We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package _loo_ for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
@@ -206,8 +193,25 @@ Nevertheless, the SHIPS model is famously poor at predicting rapid intensificati
 
 We have learned several things about hurricane forecasting during this project. Among others, that it is still possible to find open scientific questions and that it is easy to get started with simple models that can issue real forecasts that provide useful information. The probabilistic information provided by Stan also provides an interesting improvement over black-box statistical methods, while computational issues may somewhat hinder model development. We conjecture that Bayesian computation may prove useful especially in analyzing individual storms that undergo rapid intensification, since this would entail a deep analysis of a small dataset.
 
+
 \newpage
 
 # Appendix
 
-## Stan models
+## Appendix 1: Stan code for the linear regression model
+
+```{r}
+writeLines(readLines("models/linear.stan"))
+```
+
+## Appendix 2: Stan code for the Skew-regression model
+
+```{r}
+writeLines(readLines("models/minimal2.stan"))
+```
+
+## Appendix 3: Stan code for the regression with changing variance
+
+```{r}
+writeLines(readLines("models/minimal3.stan"))
+```

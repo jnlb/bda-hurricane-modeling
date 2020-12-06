@@ -81,6 +81,10 @@ Old scripts that are/were essential for development.
 
 The rest of the scripts are essentially junk.
 
+## Stan models
+
+The Stan models are found in the `models` directory.
+
 ## A note on the data
 
 Under `data` there is a dataset `atl-ships-data.csv` with ~130 covariates and the outcome variable of interest, 

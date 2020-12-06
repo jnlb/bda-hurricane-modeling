@@ -21,7 +21,7 @@ model {
   alpha ~ gamma(1,1);
   
   sigma ~ inv_chi_square(0.1);
-  y  ~ normal(theta[1] + x*theta[2:J+1], sigma + alpha*fabs(x_test[,J]+1));
+  y  ~ normal(theta[1] + x*theta[2:J+1], sigma + alpha*fabs(x[,J]+1));
 }
 
 generated quantities {
@@ -31,7 +31,7 @@ generated quantities {
   // log-likelihoods
   for (n in 1:N) {
     log_lik[n] = normal_lpdf(y[n] | theta[1] + x[n]*theta[2:J+1], 
-        sigma + alpha*fabs(x_test[,J]+1));
+        sigma + alpha*fabs(x[n,J]+1));
   }
   
   // predictions

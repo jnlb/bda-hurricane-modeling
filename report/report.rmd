@@ -78,6 +78,13 @@ $$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma), \ i=1,\dots,r,
 where we let $X_i$ denote the $i$:th row of the data, $\beta_{N-1}$ is an $N-1$-dimensional parameter vector, and $r$ is the number of observations (rows) in the data. The inference is done on the parameters $\alpha , \beta, \sigma.$ They are given the following (weak) prior distributions.
 
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) .$$
+The Stan code for this model is the following one:
+```{r}
+writeLines(readLines("models/linear.stan"))
+```
+
+We run this model for 4000 iterations with 2000 as warm-up. ESS is always higher than 100, and the $\hat{R}$ values approximated to 1.0 for each parameter, which means that we run enough iterations to reach convergence. If this was not the case and the $\hat{R}$ ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008). 
+
 
 ### Skew-regression
 
@@ -85,8 +92,9 @@ The second model is variation of the first, where instead of a normal distributi
 
 $$ y_{i} \sim \textrm{SkewNormal}(\alpha + X_i \cdot\beta_{N-1}, \sigma, \psi), \ \ i=1,\dots,r, $$
 where we use the same conventions as in the linear model. The priors of the parameters are given below.
-$$
-\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) , \ \psi_0 \sim \mathcal{N}(0,1) .$$
+$$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) , \ \psi_0 \sim \mathcal{N}(0,1) .$$
+We run this model for the same number of iterations as before: 4000 using with 2000 as warm-up, but in this case we also increased the maximum tree depth to 15. Convergence was also reached in this case, as all $\hat{R}$ values approximated to 1.0 and all ESS were higher than 100.
+
 
 ### Regression with changing variance
 
@@ -98,55 +106,14 @@ $$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma + \exp(\gamma\cd
 where, again, we use the same notation as before and let $V_{max,i}$ denote the $V_{max}$-value of the $i$:th row. Note the exponential function in the variance section; the exponential statement is used partly to ensure that the variance remains positive, and partly because it has been a good fit in preliminary analysis. The parameters are given the priors listed below.
 
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \ \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}), \ \gamma_0 \sim \Gamma(1,1) .$$
+To execute this model we used 4000 iterations with half of them as warm-up and a maximum tree depth of 15. We checked the $\hat{R}$ values and all of them approximated to 1.0, so we can state that the chains converged. Moreover ESS is always high enough.
 
-## Old models (rewrite/remove ?)
-
-Two different models have been used to study how the maximum wind speed will change in 12 hours: a linear non hierarchical model and a hierarchical one. In all cases we decided to use weakly informative priors: the means are equal to 0, and the variances are set to 10.
-
-The non hierarchical model can be mathematically summarized as:
-
-$$ \mu_{ij} \sim N(\alpha + X\beta, \sigma), \\
-\begin{bmatrix} \alpha \\ \beta_0 \end{bmatrix} \sim N(\mu_0, \Sigma_0) $$
-$$\mu_0 =  \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix} , \
-\Sigma_0 =  \begin{bmatrix} 10 & 0 & 0 \\ 0 & 10 & 0 \\ 0 & 0 & 10 \end{bmatrix}, \ \
-\sigma \sim Inv-\chi^2(\tfrac{1}{10}) .$$
-
-And its Stan code is the following one:
-```{r}
-writeLines(readLines("models/linear.stan"))
-```
-
-We first run this model for 4000 iterations with 2000 as warm-up. 
-
-
-All $\hat{R}$ values approximated to 1.0, which means that we run enough iterations to reach convergence. If this was not the case and the ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008).
-
-
-
-The hierarchical model can be mathematically summarized as follows:
-
-$$\mu_{ij} \sim N(\alpha + X\beta, \sigma) , \ 
-\begin{bmatrix} \alpha \\ \beta_1 \\ \beta_2 \end{bmatrix} \sim N(\mu, \tau),$$
-$$\mu = \begin{bmatrix} 0 \\ 0 \\ \mu_2  \end{bmatrix}, \
-\mu_2 \sim N(\alpha_{shr} + \textrm{SHRD} \beta_{shr}, \sigma_s),$$
-$$\alpha_{shr} \sim N(0,1), \
-\beta_{shr} \sim N(0,1), \
-\tau =  \begin{bmatrix} 10 & 0 & 0 \\ 0 & 10 & 0 \\ 0 & 0 & 10 \end{bmatrix} ,$$
-$$\sigma_s \sim Inv-\chi^2(0.1) , \ 
-\sigma \sim Inv-\chi^2(0.1) .$$
-
-And the Stan code of the model is the next one:
-```{r}
-writeLines(readLines("models/nonlinear.stan"))
-```
-
-This model was executed for 4000 iterations as well, where 2000 were used as warm-up. IN this case all the $\hat{R}$ values were approximated to 1.0 too, so convergence was correctly reached.
 
 ## Models Comparison
 
 We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
-The PSIS-LOO elpd for the non hierarchical model is -1636.0, the effective number of parameters is 9 with looic of 3272.1 and Monte Carlo Standard Error of 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
+The PSIS-LOO elpd for the first linear model is -1636.0, the effective number of parameters is 9 with looic of 3272.1 and Monte Carlo Standard Error of 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
 
 ![K-values for the linear model.](`r pareto_linear_path`)
 

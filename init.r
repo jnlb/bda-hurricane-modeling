@@ -42,7 +42,7 @@ load_data <- function(type="basic", target="value", forecast=12,
     
     
     if (type == "basic") { # variables to select when called with "basic"
-        vars <- c("CSST", "RHLO", "SHRD", "T200")
+        vars <- c("CSST", "RHLO", "SHRD", "VMPI", "T200")
         df <- df[c("ID", "TIME", "LAT.", "LON.", vars, "VMAX")]
     }
     else if (type=="large") { # DO NOT USE; TAKES 6+ HOURS TO SAMPLE

@@ -130,7 +130,7 @@ $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\math
 To execute this model we used 4 chains, 4000 iterations with half of them as warm-up and a maximum tree depth of 15. We checked the $\hat{R}$ values for the three variable combinations ("A", "B", and "C"), and all of them approximated to 1.0, so we can state that the chains converged in the three cases. Moreover ESS is always high enough.
 
 
-## Models Comparison
+## Model Comparison
 
 We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package _loo_ for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
@@ -200,6 +200,11 @@ Another improvement idea would be to include a time series component in the regr
 
 # Conclusions and discussion
 
+Hurricane intensity forecasting is an interesting problem which still includes unsolved scientific challenges. We have demonstrated that the existing SHIPS architecture could potentially be improved with some simple changes to the linear regression design and that probabilistic information created by Stan can provide useful information. Despite this, computational challenges may emerge if larger observation sets or variable selections are taken. The comparative efficiency of computing a simple regression point estimate is probably one of the reasons that the SHIPS model is so useful.
+
+Nevertheless, the SHIPS model is famously poor at predicting rapid intensification - a phenomenon which remains a challenge for forecasters despite other improvements to forecasting techniques. The best model chosen in this report is a model which increases variance as intensity increases, which is an imperfect way of accounting for the higher uncertainty (which is largely due to risk of rapid _intensification_ - not _weakening_).
+
+We have learned several things about hurricane forecasting during this project. Among others, that it is still possible to find open scientific questions and that it is easy to get started with simple models that can issue real forecasts that provide useful information. The probabilistic information provided by Stan also provides an interesting improvement over black-box statistical methods, while computational issues may somewhat hinder model development. We conjecture that Bayesian computation may prove useful especially in analyzing individual storms that undergo rapid intensification, since this would entail a deep analysis of a small dataset.
 
 \newpage
 

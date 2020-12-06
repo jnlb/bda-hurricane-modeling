@@ -108,6 +108,7 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{flafter}
 
 \title{BDA Project: Hurricane forecasting in Stan}
 \author{José Miguel Ramírez \& Jonas Lindblad}
@@ -120,12 +121,6 @@
 \setcounter{tocdepth}{1}
 \tableofcontents
 }
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{source}\NormalTok{(}\StringTok{"init.r"}\NormalTok{, }\DataTypeTok{local =}\NormalTok{ knitr}\OperatorTok{::}\KeywordTok{knit_global}\NormalTok{())}
-\end{Highlighting}
-\end{Shaded}
-
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
@@ -185,6 +180,8 @@ Developmental Data}. To be precise, we limit ourselves to the Atlantic
 version of the SHIPS data, and use the data from the 5-day SHIPS
 predictor file for the Atlantic. This data contains \textasciitilde140
 variables in 6-hourly time steps for every hurricane season 1982-2019.
+However, in this report we restrict the dataset to 2017-2019 in order to
+make computation more tractable.
 
 \hypertarget{description-of-the-variables}{%
 \subsubsection{Description of the
@@ -271,6 +268,8 @@ involved in the SHIPS model development. The bulk of this research is
 available at the SHIPS website:
 \href{http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/references.asp}{SHIPS
 Model References}.
+
+\newpage
 
 \hypertarget{modelling}{%
 \section{Modelling}\label{modelling}}
@@ -401,7 +400,7 @@ enough.
 \subsection{Models Comparison}\label{models-comparison}}
 
 We assessed the models using leave-one-out cross-validation (LOO-CV) to
-do further comparisons, and we used the r package \textit{loo} for using
+do further comparisons, and we used the r package \emph{loo} for using
 PSIS-LOO as method to approximate the exact LOO given the posterior
 samples.
 
@@ -417,19 +416,18 @@ that the three PSIS-LOO estimates can be considered to be reliable.
 
 \begin{figure}
 \centering
-\includegraphics{/home/jason/git/bda-hurricane-modeling/images/pareto_linear.png}
+\includegraphics[width=0.7\textwidth,height=\textheight]{/home/jason/git/bda-hurricane-modeling/images/pareto_linear.png}
 \caption{PSIS-LOO diagnosis for the linear model.}
 \end{figure}
 
 The model with dataset ``C'' has the highest PSIS-LOO and the lowest
 looic associated to it, but in order to better assess the differences
-between the datasets we have used the function
-\textbackslash textit\{loo\_compare\}. This functions computes the
-difference in elpd relative to the model with the largest elpd (in this
-case, the ``C'' model). As we can see in Table X, the differences in
-elpd and the scale relative to the standard error of these differences
-indicate that the best dataset for this model according to PSIS-LOO
-would be the dataset ``C''.
+between the datasets we have used the function \emph{loo\_compare}. This
+functions computes the difference in elpd relative to the model with the
+largest elpd (in this case, the ``C'' model). As we can see in Table X,
+the differences in elpd and the scale relative to the standard error of
+these differences indicate that the best dataset for this model
+according to PSIS-LOO would be the dataset ``C''.
 
 \begin{longtable}[]{@{}ccc@{}}
 \toprule
@@ -454,12 +452,14 @@ considered to be reliable.
 
 \begin{figure}
 \centering
-\includegraphics{/home/jason/git/bda-hurricane-modeling/images/pareto_skew.png}
+\includegraphics[width=0.7\textwidth,height=\textheight]{/home/jason/git/bda-hurricane-modeling/images/pareto_skew.png}
 \caption{PSIS-LOO diagnosis for the skewed model.}
 \end{figure}
 
-Using \textbackslash textit\{loo\_compare\} we can observe that the best
-dataset for this model would be again dataset ``C'' (Table X).
+\newpage
+
+Using \emph{loo\_compare} we can observe that the best dataset for this
+model would be again dataset ``C'' (Table X).
 
 \begin{longtable}[]{@{}ccc@{}}
 \toprule
@@ -483,13 +483,12 @@ reliable.
 
 \begin{figure}
 \centering
-\includegraphics{/home/jason/git/bda-hurricane-modeling/images/pareto_variance.png}
+\includegraphics[width=0.7\textwidth,height=\textheight]{/home/jason/git/bda-hurricane-modeling/images/pareto_variance.png}
 \caption{PSIS-LOO diagnosis for the variance model.}
 \end{figure}
 
-Using again the function \textbackslash textit\{loo\_compare\} we can
-see that the best dataset for this model would be again dataset ``C''
-(Table X).
+Using again the function \emph{loo\_compare} we can see that the best
+dataset for this model would be again dataset ``C'' (Table X).
 
 \begin{longtable}[]{@{}ccc@{}}
 \toprule
@@ -517,5 +516,70 @@ Model & \textbf{elpd\_diff} & \textbf{se\_diff}\tabularnewline
 \textbf{Linear} & -205.5 & 34.9\tabularnewline
 \bottomrule
 \end{longtable}
+
+\newpage
+
+\hypertarget{evaluation-and-potential-improvements}{%
+\section{Evaluation and potential
+improvements}\label{evaluation-and-potential-improvements}}
+
+The best model - the variance regression model - was used to generate
+forecasts for Hurricane Dorian - an especially powerful Hurricane that
+hit the Bahamas in 2019. See the image below for a comparison between
+the model predictions and Dorian's empirical intensity development.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.75\textwidth,height=\textheight]{/home/jason/git/bda-hurricane-modeling/images/proto_eval_dorian.png}
+\caption{Comparison between the true wind intensity of Hurricane Dorian
+and the 12-hour forecasts from the variance model. The black line
+represents the true wind intensity, while the shaded area is an 80\%
+prediction interval from the model. Hurricane Dorian struck the Bahamas
+as a category 5 tropical cyclone in September 2019.}
+\end{figure}
+
+Hurricane Dorian is in fact a rather exceptional storm in the sense that
+it underwent a phenomenon known as \emph{rapid intensification}, which
+is very difficult to predict for currently operational Hurricane models.
+In particular the statistical models, including SHIPS, often fails to
+predict rapid intensification, while dynamical models more often
+correctly call the phenomenon (although they have worse performance in
+other respects).
+
+The Variance model developed in this project was only developed for a
+12-hour forecast, but still the predicted 80\% interval contains the
+true wind intensity in all time steps but one. A model based on Bayesian
+computations can provide probabilistic information that is not produced
+by the point estimates generated by SHIPS models, but an efficient
+implementation may require a different model declaration.
+
+There is also a variation of the SHIPS model that combines statistical
+estimation of parameters with a dynamical component - the Logistic
+Growth Equation Model (LGEM). A suitable next step in research could be
+to implement a variation of the LGEM model in Stan and thus achieve a
+probabilistic dynamical model.
+
+Another improvement idea would be to include a time series component in
+the regression models used in this report. In fact, the operational
+SHIPS model contains some autoregressive parameters. The SHIPS model
+used by the NHC (National Hurricane Center) also contains regression
+parameters for outputs from numerical weather simulation
+(i.e.~dynamical) models used by the NHC. If an agency that has access to
+such model outputs were to include those parameters with the models
+presented in this report, it could improve prediction intervals
+significantly.
+
+\newpage
+
+\hypertarget{conclusions-and-discussion}{%
+\section{Conclusions and discussion}\label{conclusions-and-discussion}}
+
+\newpage
+
+\hypertarget{appendix}{%
+\section{Appendix}\label{appendix}}
+
+\hypertarget{stan-models}{%
+\subsection{Stan models}\label{stan-models}}
 
 \end{document}

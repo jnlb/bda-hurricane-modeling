@@ -5,6 +5,7 @@ output:
   pdf_document: 
     toc: yes
     toc_depth: 1
+    extra_dependencies: ["flafter"]
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = '..')
 ```
 
-```{r}
+```{r, include=FALSE}
 source("init.r", local = knitr::knit_global())
 ```
 
@@ -33,7 +34,7 @@ In this project, we develop models inspired by the SHIPS scheme and using the SH
 ## I think we don't have to include all our code in this file, they just want a pdf explaining the steps
 ```
 
-This project uses the 'Developmental Data' from the SHIPS website: [SHIPS Developmental Data](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/developmental_data.asp). To be precise, we limit ourselves to the Atlantic version of the SHIPS data, and use the data from the 5-day SHIPS predictor file for the Atlantic. This data contains ~140 variables in 6-hourly time steps for every hurricane season 1982-2019. 
+This project uses the 'Developmental Data' from the SHIPS website: [SHIPS Developmental Data](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/developmental_data.asp). To be precise, we limit ourselves to the Atlantic version of the SHIPS data, and use the data from the 5-day SHIPS predictor file for the Atlantic. This data contains ~140 variables in 6-hourly time steps for every hurricane season 1982-2019. However, in this report we restrict the dataset to 2017-2019 in order to make computation more tractable.
 
 ### Description of the variables
 
@@ -56,6 +57,7 @@ path <- file.path(getwd(), img_path, "corrplot_delta_small.png")
 pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
 pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
 pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
+dorian_eval_path <- file.path(getwd(), img_path, "proto_eval_dorian.png")
 ```
 
 ![Correlation plot of the variables we will include in the models.](`r path`){width=50%}
@@ -64,6 +66,8 @@ pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
 ### Prior work with the data
 
 Although the data is publicly available with no restrictions, not much work using it can be found. This may be because of the lack of general interest in meteorology or possibly the poor state of the documentation. The authors of this report are not aware of any other work with this data apart from scientific publications by the American researchers involved in the SHIPS model development. The bulk of this research is available at the SHIPS website: [SHIPS Model References](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/references.asp).
+
+\newpage
 
 # Modelling
 
@@ -112,13 +116,13 @@ To execute this model we used 4 chains, 4000 iterations with half of them as war
 
 ## Models Comparison
 
-We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
+We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package _loo_ for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
 The PSIS-LOO elpd for the basic linear model using data "A" is -1636.0 with 9 as effective number of parameters (p_loo), looic of 3272.1 and Monte Carlo Standard Error (MCSE) of 0.0. For data "B", the PSIS-LOO elpd is -1633.6 with p_loo = 10, looic = 3267.2 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1608.6, with p_loo = 13.1, looic = 3217.2 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. X. This means that the three PSIS-LOO estimates can be considered to be reliable.
 
-![PSIS-LOO diagnosis for the linear model.](`r pareto_linear_path`)
+![PSIS-LOO diagnosis for the linear model.](`r pareto_linear_path`){width=70%}
 
-The model with dataset "C" has the highest PSIS-LOO and the lowest looic associated to it, but in order to better assess the differences between the datasets we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the "C" model). As we can see in Table X, the differences in elpd and the scale relative to the standard error of these differences indicate that the best dataset for this model according to PSIS-LOO would be the dataset "C".
+The model with dataset "C" has the highest PSIS-LOO and the lowest looic associated to it, but in order to better assess the differences between the datasets we have used the function _loo_compare_. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the "C" model). As we can see in Table X, the differences in elpd and the scale relative to the standard error of these differences indicate that the best dataset for this model according to PSIS-LOO would be the dataset "C".
 
 | variable set | **elpd_diff** | **se_diff** |
 | :----------: | :-----------: | :---------: |
@@ -128,9 +132,11 @@ The model with dataset "C" has the highest PSIS-LOO and the lowest looic associa
 
 The PSIS-LOO elpd for the skewed-regression model using data "A" is -1608.1 with p_loo = 9.6, looic = 3272.1, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1602.5 with p_loo = 10.4, looic = 3205.1 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1579.4, with p_loo = 13.3, looic = 3158.7 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. X. This means that the three PSIS-LOO estimates can be considered to be reliable.
 
-![PSIS-LOO diagnosis for the skewed model.](`r pareto_skew_path`)
+![PSIS-LOO diagnosis for the skewed model.](`r pareto_skew_path`){width=70%}
 
-Using \textit{loo_compare} we can observe that the best dataset for this model would be again dataset "C" (Table X).
+\newpage
+
+Using _loo_compare_ we can observe that the best dataset for this model would be again dataset "C" (Table X).
 
 | variable set | **elpd_diff** | **se_diff** |
 | :----------: | :-----------: | :---------: |
@@ -140,9 +146,9 @@ Using \textit{loo_compare} we can observe that the best dataset for this model w
 
 The PSIS-LOO elpd for the regression with changing variance using data "A" is -1440.2 with p_loo = 7.3, looic = 2880.5, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1435.8 with p_loo = 8.3, looic = 2871.5 and MCSE approximated to 0.0. For the last dataset "C", the elpd_loo is -1403.1, with p_loo = 12.0, looic = 2806.2 and MCSE = 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the three PSIS-LOO estimates can be considered to be reliable.
 
-![PSIS-LOO diagnosis for the variance model.](`r pareto_variance_path`)
+![PSIS-LOO diagnosis for the variance model.](`r pareto_variance_path`){width=70%}
 
-Using again the function \textit{loo_compare} we can see that the best dataset for this model would be again dataset "C" (Table X).
+Using again the function _loo_compare_ we can see that the best dataset for this model would be again dataset "C" (Table X).
 
 | variable set | **elpd_diff** | **se_diff** |
 | :----------: | :-----------: | :---------: |
@@ -157,3 +163,30 @@ We have seen that the best dataset for all of our Stan models is dataset "C". If
 | **Variance** | 0.0 | 0.0 |
 | **Skew** | -176.3 | 27.8 |
 | **Linear** | -205.5 | 34.9  |
+
+\newpage
+
+# Evaluation and potential improvements
+
+The best model - the variance regression model - was used to generate forecasts for Hurricane Dorian - an especially powerful Hurricane that hit the Bahamas in 2019. See the image below for a comparison between the model predictions and Dorian's empirical intensity development.
+
+![Comparison between the true wind intensity of Hurricane Dorian and the 12-hour forecasts from the variance model. The black line represents the true wind intensity, while the shaded area is an 80% prediction interval from the model. Hurricane Dorian struck the Bahamas as a category 5 tropical cyclone in September 2019.](`r dorian_eval_path`){width=75%}
+
+Hurricane Dorian is in fact a rather exceptional storm in the sense that it underwent a phenomenon known as _rapid intensification_, which is very difficult to predict for currently operational Hurricane models. In particular the statistical models, including SHIPS, often fails to predict rapid intensification, while dynamical models more often correctly call the phenomenon (although they have worse performance in other respects). 
+
+The Variance model developed in this project was only developed for a 12-hour forecast, but still the predicted 80% interval contains the true wind intensity in all time steps but one. A model based on Bayesian computations can provide probabilistic information that is not produced by the point estimates generated by SHIPS models, but an efficient implementation may require a different model declaration.
+
+There is also a variation of the SHIPS model that combines statistical estimation of parameters with a dynamical component - the Logistic Growth Equation Model (LGEM). A suitable next step in research could be to implement a variation of the LGEM model in Stan and thus achieve a probabilistic dynamical model.
+
+Another improvement idea would be to include a time series component in the regression models used in this report. In fact, the operational SHIPS model contains some autoregressive parameters. The SHIPS model used by the NHC (National Hurricane Center) also contains regression parameters for outputs from numerical weather simulation (i.e. dynamical) models used by the NHC. If an agency that has access to such model outputs were to include those parameters with the models presented in this report, it could improve prediction intervals significantly.
+
+\newpage
+
+# Conclusions and discussion
+
+
+\newpage
+
+# Appendix
+
+## Stan models

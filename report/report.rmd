@@ -6,6 +6,7 @@ output:
     toc: yes
     toc_depth: 1
     extra_dependencies: ["flafter"]
+urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +17,8 @@ knitr::opts_knit$set(root.dir = '..')
 ```{r, include=FALSE}
 source("init.r", local = knitr::knit_global())
 ```
+
+\vspace{5mm}
 
 # Introduction
 
@@ -192,12 +195,19 @@ Nevertheless, the SHIPS model is famously poor at predicting rapid intensificati
 
 We have learned several things about hurricane forecasting during this project. Among others, that it is still possible to find open scientific questions and that it is easy to get started with simple models that can issue real forecasts that provide useful information. The probabilistic information provided by Stan also provides an interesting improvement over black-box statistical methods, while computational issues may somewhat hinder model development. We conjecture that Bayesian computation may prove useful especially in analyzing individual storms that undergo rapid intensification, since this would entail a deep analysis of a small dataset.
 
+## Code and Data Availbility
 
+All the code used for this project can be found [here](https://github.com/jnlb/bda-hurricane-modeling) and the raw data can be found in the [SHIPS website](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/developmental_data.asp).
 \newpage
 
 # Appendix
 
+\vspace{5mm}
+
 ## Appendix 1: Stan code for the linear regression model
+
+\vspace{1cm}
+
 
 ```{r, echo=FALSE}
 writeLines(readLines("models/linear.stan"))
@@ -207,6 +217,8 @@ writeLines(readLines("models/linear.stan"))
 
 ## Appendix 2: Stan code for the Skew-regression model
 
+\vspace{1cm}
+
 ```{r, echo=FALSE}
 writeLines(readLines("models/minimal2.stan"))
 ```
@@ -214,6 +226,9 @@ writeLines(readLines("models/minimal2.stan"))
 \newpage
 
 ## Appendix 3: Stan code for the regression with changing variance
+
+\vspace{1cm}
+
 
 ```{r, echo=FALSE}
 writeLines(readLines("models/minimal3.stan"))

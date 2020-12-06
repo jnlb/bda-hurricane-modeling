@@ -48,7 +48,7 @@ Describing all of the variables in the dataset is far outside the scope of this 
 
 **Sea temperature (CSST):** The main energy source for tropical storms is the thermal energy in the sea, both the sea surface temperature and the deeper ocean heat content. The SHIPS dataset contains several variables representing the sea temperature, and these are well-known to correspond to storm intensification. The main physical process is that hot water evaporates, causing upward winds (convection) that lower the pressure inside the eye of the storm. This in turn causes winds to intensify as larger masses of the atmosphere get pushed towards the low-pressure point in the storm eye. These quantities are based on direct measurements from buoys and satellite remote sensing.
 
-We will be studying the effect of different subsets of the dat. The first data set will only contain the wind shear (SHRD) and the sea temperature (CSST), we will call from now on to this dataset as "B". We will also study a dataset containing the same variables as in "A" plus an extra variable: (VMPI), we will be refering to this dataset as "B". Finally, we will also test a larger dataset with the variables SHRD, CSST, VMPI, RHLO, and T200, we will refer to this dataset as "C".
+We will also be studying the effect of different subsets of the full SHIPS set of variables. The first data set will only contain the wind shear (SHRD) and the sea temperature (CSST), we will call from now on to this dataset as "B". We will also study a dataset containing the same variables as in "A" plus an extra variable: the maximum potential intensity (VMPI), we will be refering to this dataset as "B". Finally, we will also test a larger dataset with the variables SHRD, CSST, VMPI, RHLO, and T200, we will refer to this dataset as "C".
 
 ```{r, include=FALSE}
 #I directly added the image, but if you prefer to use the r code that creates the image, that's fine with me
@@ -66,6 +66,22 @@ dorian_eval_path <- file.path(getwd(), img_path, "proto_eval_dorian.png")
 ### Prior work with the data
 
 Although the data is publicly available with no restrictions, not much work using it can be found. This may be because of the lack of general interest in meteorology or possibly the poor state of the documentation. The authors of this report are not aware of any other work with this data apart from scientific publications by the American researchers involved in the SHIPS model development. The bulk of this research is available at the SHIPS website: [SHIPS Model References](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/references.asp).
+
+### Brief explanation of chosen variables
+
+* **INCV**: intensity change from last time period to current time
+* **LAT/LON**: latitude/longitude coordinates
+* **CSST**: (climatological) sea surface temperature
+* **U200**: longitudal component of jet winds at 200 mb height
+* **RHLO**: relative humidity at low altitude (~850 mb)
+* **RHMD**: relative humidity at medium altitude (~500 mb)
+* **REFC**: rotational eddy flux convergence (don't ask)
+* **G250**: temperature gradient caused by the storm, at 250 mb
+* **T150**: air temperature at 150 mb
+* **T200**: air temperature at 200 mb
+* **SHRD**: wind shear between 850 mb and 200 mb heights
+* **VVAV**: the vertical wind near sea surface (convection)
+* **VMPI**: a variable from Potential Intensity theory; theoretically representing the maximum physically possible wind intensity that the storm could achieve in ideal conditions
 
 \newpage
 

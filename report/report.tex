@@ -239,14 +239,14 @@ winds to intensify as larger masses of the atmosphere get pushed towards
 the low-pressure point in the storm eye. These quantities are based on
 direct measurements from buoys and satellite remote sensing.
 
-We will be studying the effect of different subsets of the dat. The
-first data set will only contain the wind shear (SHRD) and the sea
-temperature (CSST), we will call from now on to this dataset as ``B''.
-We will also study a dataset containing the same variables as in ``A''
-plus an extra variable: (VMPI), we will be refering to this dataset as
-``B''. Finally, we will also test a larger dataset with the variables
-SHRD, CSST, VMPI, RHLO, and T200, we will refer to this dataset as
-``C''.
+We will also be studying the effect of different subsets of the full
+SHIPS set of variables. The first data set will only contain the wind
+shear (SHRD) and the sea temperature (CSST), we will call from now on to
+this dataset as ``B''. We will also study a dataset containing the same
+variables as in ``A'' plus an extra variable: the maximum potential
+intensity (VMPI), we will be refering to this dataset as ``B''. Finally,
+we will also test a larger dataset with the variables SHRD, CSST, VMPI,
+RHLO, and T200, we will refer to this dataset as ``C''.
 
 \begin{figure}
 \centering
@@ -268,6 +268,44 @@ involved in the SHIPS model development. The bulk of this research is
 available at the SHIPS website:
 \href{http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/references.asp}{SHIPS
 Model References}.
+
+\hypertarget{brief-explanation-of-chosen-variables}{%
+\subsubsection{Brief explanation of chosen
+variables}\label{brief-explanation-of-chosen-variables}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{INCV}: intensity change from last time period to current time
+\item
+  \textbf{LAT/LON}: latitude/longitude coordinates
+\item
+  \textbf{CSST}: (climatological) sea surface temperature
+\item
+  \textbf{U200}: longitudal component of jet winds at 200 mb height
+\item
+  \textbf{RHLO}: relative humidity at low altitude (\textasciitilde850
+  mb)
+\item
+  \textbf{RHMD}: relative humidity at medium altitude
+  (\textasciitilde500 mb)
+\item
+  \textbf{REFC}: rotational eddy flux convergence (don't ask)
+\item
+  \textbf{G250}: temperature gradient caused by the storm, at 250 mb
+\item
+  \textbf{T150}: air temperature at 150 mb
+\item
+  \textbf{T200}: air temperature at 200 mb
+\item
+  \textbf{SHRD}: wind shear between 850 mb and 200 mb heights
+\item
+  \textbf{VVAV}: the vertical wind near sea surface (convection)
+\item
+  \textbf{VMPI}: a variable from Potential Intensity theory;
+  theoretically representing the maximum physically possible wind
+  intensity that the storm could achieve in ideal conditions
+\end{itemize}
 
 \newpage
 

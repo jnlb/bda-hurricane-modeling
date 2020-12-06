@@ -54,8 +54,8 @@ We will be studying the effect of different subsets of the dat. The first data s
 
 path <- file.path(getwd(), img_path, "corrplot_delta_small.png")
 pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
-pareto_hierarchical_path <- file.path(getwd(), img_path, "pareto_hierarchical.png")
-
+pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
+pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
 ```
 
 ![Correlation plot of the variables we will include in the models.](`r path`)

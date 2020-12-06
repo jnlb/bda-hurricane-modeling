@@ -47,6 +47,7 @@ Describing all of the variables in the dataset is far outside the scope of this 
 
 **Sea temperature (CSST):** The main energy source for tropical storms is the thermal energy in the sea, both the sea surface temperature and the deeper ocean heat content. The SHIPS dataset contains several variables representing the sea temperature, and these are well-known to correspond to storm intensification. The main physical process is that hot water evaporates, causing upward winds (convection) that lower the pressure inside the eye of the storm. This in turn causes winds to intensify as larger masses of the atmosphere get pushed towards the low-pressure point in the storm eye. These quantities are based on direct measurements from buoys and satellite remote sensing.
 
+We will be studying the effect of different subsets of the dat. The first data set will only contain the wind shear (SHRD) and the sea temperature (CSST), we will call from now on to this dataset as "B". We will also study a dataset containing the same variables as in "A" plus an extra variable: (VMPI), we will be refering to this dataset as "B". Finally, we will also test a larger dataset with the variables SHRD, CSST, VMPI, RHLO, and T200, we will refer to this dataset as "C".
 
 ```{r, include=FALSE}
 #I directly added the image, but if you prefer to use the r code that creates the image, that's fine with me
@@ -83,17 +84,17 @@ The Stan code for this model is the following one:
 writeLines(readLines("models/linear.stan"))
 ```
 
-We run this model for 4000 iterations with 2000 as warm-up. ESS is always higher than 100, and the $\hat{R}$ values approximated to 1.0 for each parameter, which means that we run enough iterations to reach convergence. If this was not the case and the $\hat{R}$ ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008). 
+We run this model with 4 chains for 4000 iterations using 2000 as warm-up. We used the datasets "A", "B", and "C", and for all of them, the ESS is always higher than 100, and the $\hat{R}$ values approximated to 1.0 for each parameter, which means that we run enough iterations to reach convergence. If this was not the case and the $\hat{R}$ ratios were higher than 1, the chains would not be sampling from the same part of the parameter space and we would need either to increase the number of iterations or to edit the proposal distribution. The definition of $\hat{R}$ that we used can be found [here](https://arxiv.org/abs/1903.08008). 
 
 
 ### Skew-regression
 
-The second model is variation of the first, where instead of a normal distribution around the regression line, a skew-normal distribution is used. This probability distribution has different properties, making computation a bit less efficient, but there are scientific reasons to believe that a skew towards higher intensity changes would be a better fit. The model is summarized in mathematical language as follows.
+The second model is a variation of the first, where instead of a normal distribution around the regression line, a skew-normal distribution is used. This probability distribution has different properties, making computation a bit less efficient, but there are scientific reasons to believe that a skew towards higher intensity changes would be a better fit. The model is summarized in mathematical language as follows.
 
 $$ y_{i} \sim \textrm{SkewNormal}(\alpha + X_i \cdot\beta_{N-1}, \sigma, \psi), \ \ i=1,\dots,r, $$
 where we use the same conventions as in the linear model. The priors of the parameters are given below.
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) , \ \psi_0 \sim \mathcal{N}(0,1) .$$
-We run this model for the same number of iterations as before: 4000 using with 2000 as warm-up, but in this case we also increased the maximum tree depth to 15. Convergence was also reached in this case, as all $\hat{R}$ values approximated to 1.0 and all ESS were higher than 100.
+We run this model for the same number of iterations as before: 4000 using with 2000 as warm-up, the same number of chains: 4, and the same datasets: "A", "B", and "C". But in this case we also increased the maximum tree depth to 15. Convergence was also reached in all these cases, as all $\hat{R}$ values approximated to 1.0 and all ESS were higher than 100.
 
 
 ### Regression with changing variance
@@ -106,21 +107,66 @@ $$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma + \exp(\gamma\cd
 where, again, we use the same notation as before and let $V_{max,i}$ denote the $V_{max}$-value of the $i$:th row. Note the exponential function in the variance section; the exponential statement is used partly to ensure that the variance remains positive, and partly because it has been a good fit in preliminary analysis. The parameters are given the priors listed below.
 
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \ \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}), \ \gamma_0 \sim \Gamma(1,1) .$$
-To execute this model we used 4000 iterations with half of them as warm-up and a maximum tree depth of 15. We checked the $\hat{R}$ values and all of them approximated to 1.0, so we can state that the chains converged. Moreover ESS is always high enough.
+To execute this model we used 4 chains, 4000 iterations with half of them as warm-up and a maximum tree depth of 15. We checked the $\hat{R}$ values for the three variable combinations ("A", "B", and "C"), and all of them approximated to 1.0, so we can state that the chains converged in the three cases. Moreover ESS is always high enough.
 
 
 ## Models Comparison
 
 We assessed the models using leave-one-out cross-validation (LOO-CV) to do further comparisons, and we used the r package \textit{loo} for using PSIS-LOO as method to approximate the exact LOO given the posterior samples.
 
-The PSIS-LOO elpd for the first linear model is -1636.0, the effective number of parameters is 9 with looic of 3272.1 and Monte Carlo Standard Error of 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the PSIS-LOO estimate can be considered to be reliable.
+The PSIS-LOO elpd for the basic linear model using data "A" is -1636.0 with 9 as effective number of parameters (p_loo), looic of 3272.1 and Monte Carlo Standard Error (MCSE) of 0.0. For data "B", the PSIS-LOO elpd is -1633.6 with p_loo = 10, looic = 3267.2 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1608.6, with p_loo = 13.1, looic = 3217.2 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. X. This means that the three PSIS-LOO estimates can be considered to be reliable.
 
 ![K-values for the linear model.](`r pareto_linear_path`)
 
-The PSIS-LOO elpd for the hierarchical model is -1655.4, the effective number of parameters is 7.9 with looic of 3310.8 and Monte Carlo Standard Error approximating to 0.1. All the Pareto k estimates are lower than 0.7, with just one value above 0.5, as we can see in Figure. X+1, in this case, we can also consider the PSIS-LOO estimate as reliable.
+The model with dataset "C" has the highest PSIS-LOO and the lowest looic associated to it, but in order to better assess the differences between the datasets we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the "C" model). As we can see in Table X, the differences in elpd and the scale relative to the standard error of these differences indicate that the best dataset for this model according to PSIS-LOO would be the dataset "C".
 
-![K-values for the "basic" nonlinear model.](`r pareto_hierarchical_path`)
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+  & elpd_diff & se_diff \\ \hline
+ "C" & 0.0 & 0.0 \\ \hline
+ "B" & -25.0 & 6.5 \\ \hline
+ "A" & -27.4 & 6.3    \hline
+\end{tabular}
+\end{center}
 
 
-The hierarchical model has a lower PSIS-LOO and a higher looic associated to it, but in order to better assess the differences between the models we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the non hierarchical model), so for this first model the value retrieved is 0, and for the hierarchical model it is -19.4, with 5.9 se difference. This difference in elpd and the scale relative to the standard error of this difference indicate that the best model according to PSIS-LOO would be the hierarchical model.
+The PSIS-LOO elpd for the skewed-regression model using data "A" is -1608.1 with p_loo = 9.6, looic = 3272.1, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1602.5 with p_loo = 10.4, looic = 3205.1 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1579.4, with p_loo = 13.3, looic = 3158.7 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. X. This means that the three PSIS-LOO estimates can be considered to be reliable.
 
+![K-values for the "basic" nonlinear model.](`r pareto_skewed_path`)
+
+Using \textit{loo_compare} we can observe that the best dataset for this model would be again dataset "C" (Table X).
+
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+  & elpd_diff & se_diff \\ \hline
+ "C" & 0.0 & 0.0 \\ \hline
+ "B" & -23.2 & 6.2 \\ \hline
+ "A" & -28.7 & 6.2    \hline
+\end{tabular}
+\end{center}
+
+The PSIS-LOO elpd for the regression with changing variance using data "A" is -1440.2 with p_loo = 7.3, looic = 2880.5, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1435.8 with p_loo = 8.3, looic = 2871.5 and MCSE approximated to 0.0. For the last dataset "C", the elpd_loo is -1403.1, with p_loo = 12.0, looic = 2806.2 and MCSE = 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the three PSIS-LOO estimates can be considered to be reliable.
+
+![K-values for the "basic" nonlinear model.](`r pareto_variance_path`)
+
+Using again the function \textit{loo_compare} we can see that the best dataset for this model would be again dataset "C" (Table X).
+
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+  & elpd_diff & se_diff \\ \hline
+ "C" & 0.0 & 0.0 \\ \hline
+ "B" & -32.6 & 8.2 \\ \hline
+ "A" & -37.1 & 8.2    \hline
+\end{tabular}
+\end{center}
+
+We have seen that the best dataset for all of our Stan models is dataset "C". If we compare now the three models using this dataset, we can see that the best performing model according to PSIS-LOO would be the last studied model, the regression with chaning variance.
+
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+  & elpd_diff & se_diff \\ \hline
+ "Variance" & 0.0 & 0.0 \\ \hline
+ "Skew" & -176.3 & 27.8 \\ \hline
+ "Linear" & -205.5 & 34.9    \hline
+\end{tabular}
+\end{center}

@@ -99,12 +99,12 @@ We run this model for the same number of iterations as before: 4000 using with 2
 
 ### Regression with changing variance
 
-This is another variation of the linear regression model. In this model there is also a regression dependence on the wind intensity $V_{max}.$ This somewhat justified, since very extreme values of $V_{max}$ lead to volatile situations where the evolution of the storm can be difficult to predict even for the best forecasting agencies. There are also relatively few cases of high $V_{max}$ since every storm starts out weak, but only a few evolve to be high-category hurricanes. 
+This is another variation of the linear regression model. In this model there is also a regression variance dependence on the wind intensity $V_{max}.$ This somewhat justified, since very extreme values of $V_{max}$ lead to volatile situations where the evolution of the storm can be difficult to predict even for the best forecasting agencies. There are also relatively few cases of high $V_{max}$ since every storm starts out weak, but only a few evolve to be high-category hurricanes. 
 
 This model is declared in mathematical notation as follows:
 
-$$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma + \exp(\gamma\cdot V_{max,i})), \ i=1,\dots,r, $$
-where, again, we use the same notation as before and let $V_{max,i}$ denote the $V_{max}$-value of the $i$:th row. Note the exponential function in the variance section; the exponential statement is used partly to ensure that the variance remains positive, and partly because it has been a good fit in preliminary analysis. The parameters are given the priors listed below.
+$$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma + \gamma\vert V_{max,i} \vert ), \ i=1,\dots,r, $$
+where, again, we use the same notation as before and let $V_{max,i}$ denote the $V_{max}$-value of the $i$:th row. Note the absolute value function in the variance section; this statement is used to ensure that the variance remains positive. The parameters are given the priors listed below.
 
 $$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \ \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}), \ \gamma_0 \sim \Gamma(1,1) .$$
 To execute this model we used 4 chains, 4000 iterations with half of them as warm-up and a maximum tree depth of 15. We checked the $\hat{R}$ values for the three variable combinations ("A", "B", and "C"), and all of them approximated to 1.0, so we can state that the chains converged in the three cases. Moreover ESS is always high enough.
@@ -120,30 +120,23 @@ The PSIS-LOO elpd for the basic linear model using data "A" is -1636.0 with 9 as
 
 The model with dataset "C" has the highest PSIS-LOO and the lowest looic associated to it, but in order to better assess the differences between the datasets we have used the function \textit{loo_compare}. This functions computes the difference in elpd relative to the model with the largest elpd (in this case, the "C" model). As we can see in Table X, the differences in elpd and the scale relative to the standard error of these differences indicate that the best dataset for this model according to PSIS-LOO would be the dataset "C".
 
-\begin{center}
-\begin{tabular}{|c|c|c|} \hline
-  & elpd_diff & se_diff \\ \hline
- "C" & 0.0 & 0.0 \\ \hline
- "B" & -25.0 & 6.5 \\ \hline
- "A" & -27.4 & 6.3    \hline
-\end{tabular}
-\end{center}
-
+| variable set | **elpd_diff** | **se_diff** |
+| :----------: | :-----------: | :---------: |
+| _C_ | 0.0 | 0.0 |
+| _B_ | -25.0 | 6.5 |
+| _A_ | -27.4 | 6.3 | 
 
 The PSIS-LOO elpd for the skewed-regression model using data "A" is -1608.1 with p_loo = 9.6, looic = 3272.1, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1602.5 with p_loo = 10.4, looic = 3205.1 and MCSE = 0.1. For the last dataset "C", the elpd_loo is -1579.4, with p_loo = 13.3, looic = 3158.7 and MCSE = 0.1. All the Pareto k estimates are lower than 0.5 for the first two datasets, and there is only one value for "C" above 0.5, but it is lower than 0.7, as we can see in Figure. X. This means that the three PSIS-LOO estimates can be considered to be reliable.
 
-![PSIS-LOO diagnosis for the skewed model.](`r pareto_skewed_path`)
+![PSIS-LOO diagnosis for the skewed model.](`r pareto_skew_path`)
 
 Using \textit{loo_compare} we can observe that the best dataset for this model would be again dataset "C" (Table X).
 
-\begin{center}
-\begin{tabular}{|c|c|c|} \hline
-  & elpd_diff & se_diff \\ \hline
- "C" & 0.0 & 0.0 \\ \hline
- "B" & -23.2 & 6.2 \\ \hline
- "A" & -28.7 & 6.2    \hline
-\end{tabular}
-\end{center}
+| variable set | **elpd_diff** | **se_diff** |
+| :----------: | :-----------: | :---------: |
+| _C_ | 0.0 | 0.0 |
+| _B_ | -23.2 | 6.2 | 
+| _A_ | -28.7 | 6.2 |   
 
 The PSIS-LOO elpd for the regression with changing variance using data "A" is -1440.2 with p_loo = 7.3, looic = 2880.5, and MCSE = 0.1. For dataset "B", the PSIS-LOO elpd is -1435.8 with p_loo = 8.3, looic = 2871.5 and MCSE approximated to 0.0. For the last dataset "C", the elpd_loo is -1403.1, with p_loo = 12.0, looic = 2806.2 and MCSE = 0.0. All the Pareto k estimates are lower than 0.5, as we can see in Figure. X, which means that the three PSIS-LOO estimates can be considered to be reliable.
 
@@ -151,22 +144,16 @@ The PSIS-LOO elpd for the regression with changing variance using data "A" is -1
 
 Using again the function \textit{loo_compare} we can see that the best dataset for this model would be again dataset "C" (Table X).
 
-\begin{center}
-\begin{tabular}{|c|c|c|} \hline
-  & elpd_diff & se_diff \\ \hline
- "C" & 0.0 & 0.0 \\ \hline
- "B" & -32.6 & 8.2 \\ \hline
- "A" & -37.1 & 8.2    \hline
-\end{tabular}
-\end{center}
+| variable set | **elpd_diff** | **se_diff** |
+| :----------: | :-----------: | :---------: |
+| _C_ | 0.0 | 0.0 |
+| _B_ | -32.6 | 8.2 |
+| _A_ | -37.1 | 8.2 |
 
-We have seen that the best dataset for all of our Stan models is dataset "C". If we compare now the three models using this dataset, we can see that the best performing model according to PSIS-LOO would be the last studied model, the regression with chaning variance.
+We have seen that the best dataset for all of our Stan models is dataset "C". If we compare now the three models using this dataset, we can see that the best performing model according to PSIS-LOO would be the last studied model, the regression with changing variance.
 
-\begin{center}
-\begin{tabular}{|c|c|c|} \hline
-  & elpd_diff & se_diff \\ \hline
- "Variance" & 0.0 & 0.0 \\ \hline
- "Skew" & -176.3 & 27.8 \\ \hline
- "Linear" & -205.5 & 34.9    \hline
-\end{tabular}
-\end{center}
+| Model | **elpd_diff** | **se_diff** |
+| :----------: | :-----------: | :---------: |
+| **Variance** | 0.0 | 0.0 |
+| **Skew** | -176.3 | 27.8 |
+| **Linear** | -205.5 | 34.9  |

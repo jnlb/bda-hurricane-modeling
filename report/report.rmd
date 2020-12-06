@@ -58,7 +58,7 @@ pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
 pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
 ```
 
-![Correlation plot of the variables we will include in the models.](`r path`)
+![Correlation plot of the variables we will include in the models.](`r path`){width=50%}
 
 
 ### Prior work with the data

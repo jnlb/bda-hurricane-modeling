@@ -15,7 +15,7 @@ ships <- complete(imp)
 # with data : MINIMAL-A
 
 y = ships[,ncol(ships)]
-ships[,ncol(ships)] <- NULL ## ah, severe bug. somebody kill me now
+ships[,ncol(ships)] <- NULL 
 
 coltypes <- sapply(ships, class)
 x = ships[,coltypes!='character']
@@ -33,12 +33,8 @@ stan_data <- list(y = y,
                   tau = Sig)
 
 linear_m <- rstan::stan_model(file = file.path(mod_path, "linear.stan"))
-#por aquí
 linear_model <- rstan::sampling(linear_m, data = stan_data, 
                                 iter=4000, seed = SEED)
-
-Sys.sleep(5)
-monitor(linear_model)
 
 
 ## next model: skewed regression type
@@ -70,22 +66,16 @@ skew_model <- rstan::sampling(skew_m, data = stan_data,
 
 Sys.sleep(5)
 
-# Convergence diagnostics
 monitor(skew_model)
 
 
 ## next model: variance regression type
-
-
 variance_m <- rstan::stan_model(file = file.path(mod_path, "minimal3.stan"))
-# needed to increase max. tree depth
 variance_model <- rstan::sampling(variance_m, data = stan_data, 
                               control = list(max_treedepth = 15),
                               iter=4000, seed = SEED)
 
 Sys.sleep(5)
-
-# Convergence diagnostics
 monitor(variance_model)
 
 
@@ -93,42 +83,15 @@ monitor(variance_model)
 
 loo_l <- loo(linear_model,  cores = 4)
 loo_s <- loo(skew_model,  cores = 4)
-loo_v <- loo(skew_model,  cores = 4)
+loo_v <- loo(variance_model,  cores = 4)
 
-png(file="images/pareto_linear.png")
-plot(loo_l$pointwise[,5], ylab="Pareto K", xlab="Data Point",
-     main="PSIS_LOO Diagnostics (Linear Model)", pch=3)
-abline(h=0.7, lty=2)
-abline(h=0.5, lty=2)
-dev.off()
-
-png(file="images/pareto_skew.png")
-plot(loo_s$pointwise[,5], ylab="Pareto K", xlab="Data Point",
-     main="PSIS_LOO Diagnostics (Skewed Model)", pch=3)
-abline(h=0.7, lty=2)
-abline(h=0.5, lty=2)
-dev.off()
-
-png(file="images/pareto_variance.png")
-plot(loo_v$pointwise[,5], ylab="Pareto K", xlab="Data Point",
-     main="PSIS_LOO Diagnostics (Variance Model)", pch=3)
-abline(h=0.7, lty=2)
-abline(h=0.5, lty=2)
-dev.off()
 
 library(loo)
 loo_compare(loo_l, loo_s, loo_v)
 
 
 
-
-
-
-
-
-#Using basic data
-
-
+#Using "C" data
 load_data(type="basic", target="delta", 
           standardize=TRUE)
 SEED <- 123
@@ -158,8 +121,7 @@ stan_data <- list(y = y,
                   mu = mu,
                   tau = Sig)
 
-linear_m_b <- rstan::stan_model(file = file.path(mod_path, "linear.stan"))
-linear_model_b <- rstan::sampling(linear_m_b, data = stan_data, 
+linear_model_b <- rstan::sampling(linear_m, data = stan_data, 
                                 iter=4000, seed = SEED)
 
 Sys.sleep(5)
@@ -187,54 +149,38 @@ stan_data <- list(y = y,
                   mu = mu,
                   tau = Sig)
 
-skew_m_b <- rstan::stan_model(file = file.path(mod_path, "minimal2.stan"))
-# needed to increase max. tree depth
-skew_model_b <- rstan::sampling(skew_m_b, data = stan_data, 
+skew_model_b <- rstan::sampling(skew_m, data = stan_data, 
                               control = list(max_treedepth = 15),
                               iter=4000, seed = SEED)
 
-Sys.sleep(5)
 
-# Convergence diagnostics
-monitor(skew_model_b)
-
-
-## next model: variance regression type
-
-
-variance_m_b <- rstan::stan_model(file = file.path(mod_path, "minimal3.stan"))
-# needed to increase max. tree depth
-variance_model_b <- rstan::sampling(variance_m_b, data = stan_data, 
+## variance regression type
+variance_model_b <- rstan::sampling(variance_m, data = stan_data, 
                                   control = list(max_treedepth = 15),
                                   iter=4000, seed = SEED)
-
-Sys.sleep(5)
-
-# Convergence diagnostics
-monitor(variance_model_b)
 
 
 #Models Comparison
 
 loo_l_b <- loo(linear_model_b,  cores = 4)
 loo_s_b <- loo(skew_model_b,  cores = 4)
-loo_v_b <- loo(skew_model_b,  cores = 4)
+loo_v_b <- loo(variance_model_b,  cores = 4)
 
-png(file="images/pareto_linear_b.png")
+png(file="images/pareto_linear_C.png")
 plot(loo_l_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
      main="PSIS_LOO Diagnostics (Linear Model)", pch=3)
 abline(h=0.7, lty=2)
 abline(h=0.5, lty=2)
 dev.off()
 
-png(file="images/pareto_skew_b.png")
+png(file="images/pareto_skew_C.png")
 plot(loo_s_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
      main="PSIS_LOO Diagnostics (Skewed Model)", pch=3)
 abline(h=0.7, lty=2)
 abline(h=0.5, lty=2)
 dev.off()
 
-png(file="images/pareto_variance_b.png")
+png(file="images/pareto_variance_C.png")
 plot(loo_v_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
      main="PSIS_LOO Diagnostics (Variance Model)", pch=3)
 abline(h=0.7, lty=2)
@@ -248,14 +194,7 @@ loo_compare(loo_l, loo_l_b)
 
 
 
-
-
-
-
-
 #MINIMAL-B
-
-
 
 load_data(type="minimal-B", target="delta", 
           standardize=TRUE)
@@ -286,8 +225,7 @@ stan_data <- list(y = y,
                   mu = mu,
                   tau = Sig)
 
-linear_m_min_b <- rstan::stan_model(file = file.path(mod_path, "linear.stan"))
-linear_model_min_b <- rstan::sampling(linear_m_min_b, data = stan_data, 
+linear_model_min_b <- rstan::sampling(linear_m, data = stan_data, 
                                   iter=4000, seed = SEED)
 
 ## next model: skewed regression type
@@ -311,18 +249,13 @@ stan_data <- list(y = y,
                   mu = mu,
                   tau = Sig)
 
-skew_m_min_b <- rstan::stan_model(file = file.path(mod_path, "minimal2.stan"))
-# needed to increase max. tree depth
-skew_model_min_b <- rstan::sampling(skew_m_min_b, data = stan_data, 
+skew_model_min_b <- rstan::sampling(skew_m, data = stan_data, 
                                 control = list(max_treedepth = 15),
                                 iter=4000, seed = SEED)
 
 
-
 ## next model: variance regression type
-variance_m_min_b <- rstan::stan_model(file = file.path(mod_path, "minimal3.stan"))
-# needed to increase max. tree depth
-variance_model_min_b <- rstan::sampling(variance_m_min_b, data = stan_data, 
+variance_model_min_b <- rstan::sampling(variance_m, data = stan_data, 
                                     control = list(max_treedepth = 15),
                                     iter=4000, seed = SEED)
 
@@ -332,30 +265,97 @@ variance_model_min_b <- rstan::sampling(variance_m_min_b, data = stan_data,
 
 loo_l_min_b <- loo(linear_model_min_b,  cores = 4)
 loo_s_min_b <- loo(skew_model_min_b,  cores = 4)
-loo_v_min_b <- loo(skew_model_min_b,  cores = 4)
+loo_v_min_b <- loo(variance_model_min_b,  cores = 4)
 
-png(file="images/pareto_linear_min_b.png")
+png(file="images/pareto_linear_B.png")
 plot(loo_l_min_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
      main="PSIS_LOO Diagnostics (Linear Model)", pch=3)
 abline(h=0.7, lty=2)
 abline(h=0.5, lty=2)
 dev.off()
 
-png(file="images/pareto_skew_min_b.png")
+png(file="images/pareto_skew_B.png")
 plot(loo_s_min_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
      main="PSIS_LOO Diagnostics (Skewed Model)", pch=3)
 abline(h=0.7, lty=2)
 abline(h=0.5, lty=2)
 dev.off()
 
-png(file="images/pareto_variance_min_b.png")
+png(file="images/pareto_variance_B.png")
 plot(loo_v_min_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
      main="PSIS_LOO Diagnostics (Variance Model)", pch=3)
 abline(h=0.7, lty=2)
 abline(h=0.5, lty=2)
 dev.off()
 
+
 library(loo)
+loo_compare(loo_l, loo_s, loo_v)
+loo_compare(loo_l_b, loo_s_b, loo_v_b)
 loo_compare(loo_l_min_b, loo_s_min_b, loo_v_min_b)
+
 loo_compare(loo_l, loo_l_min_b, loo_l_b)
 loo_compare(loo_s, loo_s_min_b, loo_s_b)
+loo_compare(loo_v, loo_v_min_b, loo_v_b)
+
+
+
+
+#Plots
+
+png(file="images/pareto_linear.png", width = 600, height = 300)
+par(mfrow=c(1,3), cex=0.9)
+plot(loo_l$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'A'", pch=3, ylim=c(-0.3,0.7))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+
+plot(loo_l_min_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'B'", pch=3, ylim=c(-0.3,0.7))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+
+plot(loo_l_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'C'", pch=3, ylim=c(-0.3,0.7))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+dev.off()
+
+
+png(file="images/pareto_skew.png", width = 600, height = 300)
+par(mfrow=c(1,3), cex=0.9)
+plot(loo_s$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'A'", pch=3, ylim=c(-0.3,0.6))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+
+plot(loo_s_min_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'B'", pch=3, ylim=c(-0.3,0.6))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+
+plot(loo_s_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'C'", pch=3, ylim=c(-0.3,0.6))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+dev.off()
+
+
+
+png(file="images/pareto_variance.png", width = 600, height = 300)
+par(mfrow=c(1,3), cex=0.9)
+plot(loo_v$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'A'", pch=3, ylim=c(-0.4,0.4))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+
+plot(loo_v_min_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'B'", pch=3, ylim=c(-0.4,0.4))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+
+plot(loo_v_b$pointwise[,5], ylab="Pareto K", xlab="Data Point",
+     main="Dataset 'C'", pch=3, ylim=c(-0.4,0.4))
+abline(h=0.7, lty=2)
+abline(h=0.5, lty=2)
+dev.off()

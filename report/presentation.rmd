@@ -1,13 +1,88 @@
 ---
 title: "BDA Project: Hurricane forecasting in Stan"
-author: "José & Jonas"
-output: beamer_presentation
+author: "José Miguel Ramírez & Jonas Lindblad"
+output: 
+    beamer_presentation:
+        incremental: true
 ---
+
+<!-- 1. introduce the problem we are trying to solve -->
+## Hurricane forecasting basics
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+- Forecasters predict two quantities: track and intensity
+- Two kinds of models: _dynamical_ and _statistical_
+    - Dynamical: simulate the laws of physics
+    - Statistical: estimate based on historical data
+- Dynamical vs. statistical: good at long- and short-range forecasts respectively
+- _Rapid intensification_: forecasted better by dynamical models
+- This project: a _statistical_ model for _intensity_
+
+<!-- 1.1. an image explaining the variable set we have used -->
+## Hurricane forecasting basics: the SHIPS data
+
+
+<!-- 1.2. correlation plot ? -->
+## Hurricane forecasting basics: our selection
+
+
+<!-- 2. explain the 3 models; visually rather than with text -->
+## Intensity change predictive model
+
+
+<!-- 2.1. some remarks on limits of the model(s) -->
+## Model: limitations
+
+
+<!-- 2.2. model comparison with posterior predictive checks (visually) -->
+## Model: posterior predictive checking
+
+
+<!-- 2.3. data selection comparisons -->
+## Model: variables to use
+
+
+<!-- 2.4. distribution of coefficients (visually) -->
+## Model: marginal posteriors of coefficients
+
+
+<!-- 2.5. special case: bivariate margin of SHRD and CSST? (optional?) -->
+## Model: margin of SHRD and CSST
+
+
+<!-- 3. example forecasts on historical storms -->
+## Forecasting
+
+
+<!-- 3.1. compare with other models -->
+## Forecasting: model comparison
+
+
+<!-- 3.2. try looking for historical NHC predictions? (can be skimmed incase of time running out) -->
+## Forecasting: what about the NHC?
+
+
+<!-- 4. Final section -->
+## Problems to solve & development ideas
+
+
+<!-- 4.1. Conclusions  -->
+## Conclusions & contact info
+<!-- don't put your email address directly : github crawlers will find it and send you spam -->
+
+
+<!-- 4.2 Extra material -->
+## Additional information
+
+<!-- We need to consider what questions the TAs are likely to ask -->
+
+<!-- Consider including an image which explains how Hurricanes form -->
+
+
+<!-- EXTRA: beamer syntax tutorial below -->
 ## R Markdown
 
 This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.

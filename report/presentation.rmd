@@ -6,6 +6,8 @@ author: |
 output: 
     beamer_presentation:
         incremental: true
+header-includes:
+  \usepackage{dcolumn}
 ---
 
 <!-- 1. introduce the problem we are trying to solve -->
@@ -21,12 +23,18 @@ knitr::opts_knit$set(root.dir = '..')
 source("init.r", local = knitr::knit_global())
 hurricane <- file.path(getwd(), img_path, "hurricane.jpg")
 path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered.png")
+
+pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
+pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
+pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
 ```
 <!-- note that for syntax reasons there needs to be a space '- ' -->
 - Destructive storms occuring in the late summer and fall in the northern hemisphere’s tropical region.   
 - Classified by their wind intensity at the eye wall.  
 - They can cause extreme levels of flooding and destroy many buildings.  
 - Monetary damages and loss of lives increase with an almost exponential character as a function of storm intensity.  
+
+\center
 
 ![](`r hurricane`){width=60%}
 
@@ -94,8 +102,94 @@ The US government forecasting agency, the National Hurricane Center (NHC), uses 
 ## Forecasting
 
 
-<!-- 3.1. compare with other models -->
-## Forecasting: model comparison
+<!-- 3.1.1 compare with other models -->
+## Forecasting: Model Comparison (1)
+
+\vspace{0.4cm}
+
+Dataset comparison for the **linear regression model** (LOOCV)  
+
+\vspace{0.1cm}
+
+\begin{table}[!h]
+\fontsize{8pt}{12pt}\selectfont
+\begin{tabular}{ c c c }
+ Dataset & \textbf{elpd\_diff} & \textbf{se\_diff} \\ \hline
+ \textbf{\textit{C}} & 0.0 & 0.0 \\  
+ \textit{B} & -25.0 & 6.5 \\  
+ \textit{A} & -27.4 & 6.3 \\     
+\end{tabular}
+\end{table}
+
+\vspace{-0.2cm}
+
+\center
+![](`r pareto_linear_path`){height=60%}
+
+<!-- 3.1.2 compare with other models -->
+## Forecasting: Model Comparison (2)
+
+\vspace{0.4cm}
+
+Dataset comparison for the **skewed regression model** (LOOCV)  
+
+\vspace{0.1cm}
+
+\begin{table}[!h]
+\fontsize{8pt}{12pt}\selectfont
+\begin{tabular}{ c c c }
+ Dataset & \textbf{elpd\_diff} & \textbf{se\_diff} \\ \hline
+ \textbf{\textit{C}} & 0.0 & 0.0 \\  
+ \textit{B} & -23.2 & 6.2 \\  
+ \textit{A} & -28.7 & 6.2 \\     
+\end{tabular}
+\end{table}
+
+
+\vspace{-0.2cm}
+\center
+![](`r pareto_skew_path`){height=60%}
+
+<!-- 3.1.3 compare with other models -->
+## Forecasting: Model Comparison (3)
+
+\vspace{0.4cm}
+
+Dataset comparison for the **Changing variance model** (LOOCV)  
+
+\vspace{0.1cm}  
+
+\begin{table}[!h]
+\fontsize{8pt}{12pt}\selectfont
+\begin{tabular}{ c c c }
+ Dataset & \textbf{elpd\_diff} & \textbf{se\_diff} \\ \hline
+ \textbf{\textit{C}} & 0.0 & 0.0 \\  
+ \textit{B} & -32.6 & 8.2 \\  
+ \textit{A} & -37.1 & 8.2 \\     
+\end{tabular}
+\end{table}
+
+
+\vspace{-0.2cm}
+\center
+![](`r pareto_variance_path`){height=60%}
+
+<!-- 3.1.4 compare with other models -->
+## Forecasting: Model Comparison (4)
+
+Model comparison using the Dataset C (LOOCV) 
+\vspace{1cm}
+
+\begin{table}[!h]
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{ c c c }
+ Model & \textbf{elpd\_diff} & \textbf{se\_diff} \\ \hline
+ \textbf{Variance} & 0.0 & 0.0 \\  
+ Skew & -176.3 & 27.8 \\  
+ Linear & -205.5 & 34.9 \\     
+\end{tabular}
+\end{table}
+
 
 
 <!-- 3.2. try looking for historical NHC predictions? (can be skimmed incase of time running out) -->

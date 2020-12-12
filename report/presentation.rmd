@@ -1,17 +1,37 @@
 ---
 title: "BDA Project: Hurricane forecasting in Stan"
-author: "José Miguel Ramírez & Jonas Lindblad"
+author: | 
+  | José Miguel Ramírez & Jonas Lindblad
+  | Aalto University
 output: 
     beamer_presentation:
         incremental: true
 ---
 
 <!-- 1. introduce the problem we are trying to solve -->
-## Hurricane forecasting basics
+## Hurricane introduction
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_knit$set(root.dir = '..')
 ```
+
+
+```{r, include=FALSE}
+source("init.r", local = knitr::knit_global())
+hurricane <- file.path(getwd(), img_path, "hurricane.jpg")
+path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered.png")
+```
+
+-Destructive storms occuring in the late summer and fall in the northern hemisphere’s tropical region.   
+-Classified by their wind intensity at the eye wall.  
+-They can cause extreme levels of flooding and destroy many buildings.  
+-Monetary damages and loss of lives increase with an almost exponential character as a function of storm intensity.  
+
+![](`r hurricane`){width=60%}
+
+
+## Hurricane forecasting basics
 
 - Forecasters predict two quantities: track and intensity
 - Two kinds of models: _dynamical_ and _statistical_
@@ -28,6 +48,8 @@ knitr::opts_chunk$set(echo = FALSE)
 <!-- 1.2. correlation plot ? -->
 ## Hurricane forecasting basics: our selection
 
+
+![](`r path`){width=80%}
 
 <!-- 2. explain the 3 models; visually rather than with text -->
 ## Intensity change predictive model

@@ -23,10 +23,10 @@ hurricane <- file.path(getwd(), img_path, "hurricane.jpg")
 path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered.png")
 ```
 
--Destructive storms occuring in the late summer and fall in the northern hemisphere’s tropical region.   
--Classified by their wind intensity at the eye wall.  
--They can cause extreme levels of flooding and destroy many buildings.  
--Monetary damages and loss of lives increase with an almost exponential character as a function of storm intensity.  
+- Destructive storms occuring in the late summer and fall in the northern hemisphere’s tropical region.   
+- Classified by their wind intensity at the eye wall.  
+- They can cause extreme levels of flooding and destroy many buildings.  
+- Monetary damages and loss of lives increase with an almost exponential character as a function of storm intensity.  
 
 ![](`r hurricane`){width=60%}
 

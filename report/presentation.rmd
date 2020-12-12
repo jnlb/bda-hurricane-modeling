@@ -22,7 +22,7 @@ source("init.r", local = knitr::knit_global())
 hurricane <- file.path(getwd(), img_path, "hurricane.jpg")
 path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered.png")
 ```
-
+<!-- note that for syntax reasons there needs to be a space '- ' -->
 - Destructive storms occuring in the late summer and fall in the northern hemisphere’s tropical region.   
 - Classified by their wind intensity at the eye wall.  
 - They can cause extreme levels of flooding and destroy many buildings.  
@@ -38,20 +38,35 @@ path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered
     - Dynamical: simulate the laws of physics
     - Statistical: estimate based on historical data
 - Dynamical vs. statistical: good at long- and short-range forecasts respectively
+- ...but for hurricane forecasts short-range is usually more interesting
 - _Rapid intensification_: forecasted better by dynamical models
 - This project: a _statistical_ model for _intensity_
 
-<!-- 1.1. an image explaining the variable set we have used -->
+<!-- 1.1. needed a longer explanation for this part... -->
 ## Hurricane forecasting basics: the SHIPS data
 
+The US government forecasting agency, the National Hurricane Center (NHC), uses a large number of models operationally. The models (together: the _model ensemble_) are used together with experienced meteorologists' judgment to provide the official forecast. 
 
-<!-- 1.2. correlation plot ? -->
+- Surprisingly, the best _single_ (short-range) model is a multiple linear regression!
+- The NHC regression model: Statistical Hurricane Intensity Prediction Scheme (SHIPS)
+- SHIPS: ~140 covariates, many calculated from data sources more easily available to the NHC
+- SHIPS dataset: publically available with no restrictions (link: [SHIPS Development](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/index.asp))
+- ...but the documentation is terrible
+- SHIPS: only a point estimate; our project: a predictive distribution
+
+<!-- 1.2-a. an image explaining the variable set we have used -->
+## Hurricane forecasting basics: the SHIPS data
+
+<!-- 1.2-b. correlation plot ? -->
 ## Hurricane forecasting basics: our selection
 
 
 ![](`r path`){width=80%}
 
 <!-- 2. explain the 3 models; visually rather than with text -->
+<!-- idea: Kruschke diagrams -->
+<!-- https://github.com/rasmusab/distribution_diagrams -->
+<!-- we would need 3 different Kruschke diagrams for the models -->
 ## Intensity change predictive model
 
 
@@ -89,6 +104,10 @@ path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered
 
 <!-- 4. Final section -->
 ## Problems to solve & development ideas
+
+- variable selection in full SHIPS dataset
+- more time series autoregressive components
+- use LGEM model (will explain)
 
 
 <!-- 4.1. Conclusions  -->

@@ -21,9 +21,17 @@ knitr::opts_knit$set(root.dir = '..')
 
 ```{r, include=FALSE}
 source("init.r", local = knitr::knit_global())
+
+# images
 hurricane <- file.path(getwd(), img_path, "hurricane.jpg")
 path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered.png")
 
+# diagrams
+regression_diag <- file.path(getwd(), img_path, "simple_regression.png")
+skew_diag <- file.path(getwd(), img_path, "skew_regression.png")
+variance_diag <- file.path(getwd(), img_path, "variance_regression.png")
+
+# pareto-k plots
 pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
 pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
 pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
@@ -77,6 +85,27 @@ The US government forecasting agency, the National Hurricane Center (NHC), uses 
 <!-- we would need 3 different Kruschke diagrams for the models -->
 ## Intensity change predictive model
 
+The SHIPS Blunder: a simple linear regression
+
+![](`r regression_diag`){width=100%}
+
+## Intensity change predictive model
+
+Model 2: regression with skewness
+
+- errors not symmetric around the mean prediction!
+- rapid intensification!
+
+![](`r skew_diag`){width=80%}
+
+## Intensity change predictive model
+
+Model 3: regression with a linear model for standard deviation
+
+- fewer storms reach higher values of `VMAX` 
+- allow for higher variance to account for larger historical uncertainty
+
+![](`r variance_diag`){width=80%}
 
 <!-- 2.1. some remarks on limits of the model(s) -->
 ## Model: limitations

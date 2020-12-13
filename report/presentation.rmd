@@ -31,6 +31,11 @@ regression_diag <- file.path(getwd(), img_path, "simple_regression.png")
 skew_diag <- file.path(getwd(), img_path, "skew_regression.png")
 variance_diag <- file.path(getwd(), img_path, "variance_regression.png")
 
+# ships variables
+ships_no <- file.path(getwd(), img_path, "ships_img.png")
+ships_time <- file.path(getwd(), img_path, "ships_img_time.png")
+ships_vars <- file.path(getwd(), img_path, "ships_img_vars.png")
+
 # pareto-k plots
 pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
 pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
@@ -73,11 +78,44 @@ The US government forecasting agency, the National Hurricane Center (NHC), uses 
 <!-- 1.2-a. an image explaining the variable set we have used -->
 ## Hurricane forecasting basics: the SHIPS data
 
+The SHIPS developmental data is confusing!
+
+![](`r ships_no`){width=100%}
+
+## Hurricane forecasting basics: the SHIPS data
+
+We are making _synoptic_ models.
+
+![](`r ships_time`){width=100%}
+
+## Hurricane forecasting basics: the SHIPS data
+
+We are making _synoptic_ models and choosing variables.
+
+![](`r ships_vars`){width=100%}
+
 <!-- 1.2-b. correlation plot ? -->
 ## Hurricane forecasting basics: our selection
 
+We have not done statistical variable selection. Choice of variable subset is based on theory.
 
+>- **CSST**: (climatological) sea surface temperature
+>- **RHLO**: low-altitude relative humidity
+>- **T200**: air temperature at 200 mb (very high altitude)
+>- **SHRD**: wind shear between 850 and 200 mb
+>- **VMPI**: maximum potential intensity
+
+:::: {.columns}
+::: {.column width="50%"}
 ![](`r path`){width=80%}
+:::
+::: {.column width="50%"}
+>- for testing, we have some variable sets *A, B, C*
+>- *A*: VMAX, CSST, SHRD
+>- *B*: VMAX, CSST, SHRD, VMPI
+>- *C*: VMAX, CSST, SHRD, VMPI, RHLO, T200
+:::
+::::
 
 <!-- 2. explain the 3 models; visually rather than with text -->
 <!-- idea: Kruschke diagrams -->
@@ -108,24 +146,14 @@ Model 3: regression with a linear model for standard deviation
 ![](`r variance_diag`){width=80%}
 
 <!-- 2.1. some remarks on limits of the model(s) -->
-## Model: limitations
+## Models: some remarks
 
-
-<!-- 2.2. model comparison with posterior predictive checks (visually) -->
-## Model: posterior predictive checking
-
-
-<!-- 2.3. data selection comparisons -->
-## Model: variables to use
-
-
-<!-- 2.4. distribution of coefficients (visually) -->
-## Model: marginal posteriors of coefficients
-
-
-<!-- 2.5. special case: bivariate margin of SHRD and CSST? (optional?) -->
-## Model: margin of SHRD and CSST
-
+- SHIPS: predict $V_{max}$; our models: predict $\Delta V_{max}$
+- reminder: we do 12-hour forecasts
+- we standardized all of our data; priors chosen to be weak in standardized scale
+- SHIPS data: 1982-2019; our restriction: 2017-2019
+- poor problem setup! True model is the laws of physics, but we are fitting a regression
+- models were programmed in Stan; sampling with `rstan` resulted in no divergences or issues except for the skew model and the issue was solved by increasing max tree depth to 15
 
 <!-- 3. example forecasts on historical storms -->
 ## Forecasting
@@ -244,30 +272,3 @@ Model comparison using the Dataset C (LOOCV)
 <!-- We need to consider what questions the TAs are likely to ask -->
 
 <!-- Consider including an image which explains how Hurricanes form -->
-
-
-<!-- EXTRA: beamer syntax tutorial below -->
-## R Markdown
-
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
-
-## Slide with Bullets
-
-- Bullet 1
-- Bullet 2
-- Bullet 3
-
-## Slide with R Output
-
-```{r cars, echo = TRUE}
-summary(cars)
-```
-
-## Slide with Plot
-
-```{r pressure}
-plot(pressure)
-```
-

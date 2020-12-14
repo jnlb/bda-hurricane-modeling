@@ -347,6 +347,33 @@ Jonas Lindblad
 
 <!-- 4.2 Extra material -->
 ## Additional information
+The SHIPS model:
+$$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma), \ i=1,\dots,r, $$
+where we let $X_i$ denote the $i$:th row of the data, $\beta_{N-1}$ is an $N-1$-dimensional parameter vector, and $r$ is the number of observations (rows) in the data. Its priors were 
+$$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) .$$
+The skew-normal regression model: 
+$$ y_{i} \sim \textrm{SkewNormal}(\alpha + X_i \cdot\beta_{N-1}, \sigma, \psi), \ \ i=1,\dots,r, $$
+with priors 
+$$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}) , \ \psi_0 \sim \mathcal{N}(0,1) .$$
+
+## Additional information
+
+The variance model:
+$$ y_{i} \sim \mathcal{N}(\alpha + X_i \cdot\beta_{N-1}, \sigma + \gamma\vert V_{max,i} \vert ), \ i=1,\dots,r, $$
+where, again, we use the same notation as before and let $V_{max,i}$ denote the $V_{max}$-value of the $i$:th row. The priors that were fed into Stan were
+$$\begin{bmatrix} \alpha_0 \\ \beta_{N-1,0} \end{bmatrix} \sim \mathcal{N}(\mathbf{0}_N, 10 \cdot \mathbf{I}_N), \ \sigma_0 \sim \textrm{Inv-}\chi^2(\tfrac{1}{10}), \ \gamma_0 \sim \Gamma(1,1) .$$
+
+## Additional information
+
+The variance regression was run in `rstan` with the following options
+```
+variance_m <- rstan::stan_model(file = file.path(mod_path, 
+              "minimal3.stan"))
+variance_model <- rstan::sampling(variance_m, 
+                data = stan_data, 
+                control = list(max_treedepth = 10),
+                iter=4000, seed = SEED)
+```
 
 <!-- We need to consider what questions the TAs are likely to ask -->
 

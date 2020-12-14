@@ -272,7 +272,7 @@ Model comparison using the Dataset C (LOOCV)
 
 \center
 
-![](`r marginals`){width=80%}
+![](`r marginals`){width=75%}
 
 <!-- 3.2. try looking for historical NHC predictions? (can be skimmed incase of time running out) -->
 ## Forecasting: checking predictions
@@ -310,7 +310,8 @@ Further development ideas:
 
 <!-- 4.1. Conclusions  -->
 ## A final takeaway
-<!-- don't put your email address directly : github crawlers will find it and send you spam -->
+
+Talking about the 2017 category 5 hurricane Irma:
 
 > "The hurricane will be moving through an environment of low vertical
 wind shear, a moist mid-level atmosphere, and increasing upper-ocean

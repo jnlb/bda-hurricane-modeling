@@ -61,15 +61,17 @@ variance_model <- rstan::sampling(variance_m, data = stan_data,
                               control = list(max_treedepth = 10),
                               iter=4000, seed = SEED)
 
-Sys.sleep(5)
-monitor(variance_model)
 
 # marginal posteriors
 
 # I have problems getting bayesplot to work...
 library("bayesplot")
 posterior <- as.array(variance_model)
-mcmc_intervals(posterior, pars = c("theta[1]", "theta[2]", "theta[3]", 
+pdf(file="images/variance_marginals.pdf") 
+mcmc_areas(posterior, pars = c("theta[1]", "theta[2]", "theta[3]", 
                                    "theta[4]", "theta[5]", "theta[6]", 
                                    "theta[7]", "theta[8]", "theta[9]", 
-                                   "sigma", "alpha"))
+                                   "sigma", "alpha"),  prob = 0.8,
+           prob_outer = 0.99, # 99%
+           point_est = "mean")
+dev.off()

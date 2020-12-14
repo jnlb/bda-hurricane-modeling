@@ -6,12 +6,18 @@ author: |
 output: 
     beamer_presentation:
         incremental: true
+        slide_level: 2
+        keep_tex: false
+        toc: false
+        theme: "Singapore"
+        colortheme: "beaver"
+        fonttheme: "structurebold"
 header-includes:
   \usepackage{dcolumn}
 ---
 
 <!-- 1. introduce the problem we are trying to solve -->
-## Hurricane introduction
+# Hurricane introduction
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -20,6 +26,7 @@ knitr::opts_knit$set(root.dir = '..')
 
 
 ```{r, include=FALSE}
+library(tufte)
 source("init.r", local = knitr::knit_global())
 
 # images
@@ -126,15 +133,17 @@ We have not done statistical variable selection. Choice of variable subset is ba
 :::
 ::::
 
+# Intensity change predictive model
+
 <!-- 2. explain the 3 models; visually rather than with text -->
 <!-- idea: Kruschke diagrams -->
 <!-- https://github.com/rasmusab/distribution_diagrams -->
 <!-- we would need 3 different Kruschke diagrams for the models -->
-## Intensity change predictive model
+
 
 The SHIPS Blunder: a simple linear regression
 
-![](`r regression_diag`){width=100%}
+![](`r regression_diag`){width=95%}
 
 ## Intensity change predictive model
 
@@ -143,7 +152,7 @@ Model 2: regression with skewness
 - errors not symmetric around the mean prediction!
 - rapid intensification!
 
-![](`r skew_diag`){width=80%}
+![](`r skew_diag`){width=75%}
 
 ## Intensity change predictive model
 
@@ -152,7 +161,7 @@ Model 3: regression with a linear model for standard deviation
 - fewer storms reach higher values of `VMAX` 
 - allow for higher variance to account for larger historical uncertainty
 
-![](`r variance_diag`){width=80%}
+![](`r variance_diag`){width=75%}
 
 <!-- 2.1. some remarks on limits of the model(s) -->
 ## Models: some remarks
@@ -166,7 +175,7 @@ Model 3: regression with a linear model for standard deviation
 - models were programmed in Stan; sampling with `rstan` resulted in no divergences or issues except for the skew model and the issue was solved by increasing max tree depth to 15
 
 <!-- 3.1.1 compare with other models -->
-## Forecasting: Model Comparison (1)
+# Forecasting: Model Comparison
 
 \vspace{0.4cm}
 
@@ -266,29 +275,33 @@ Model comparison using the Dataset C (LOOCV)
 >- $\theta_9$: intensity at storm core (VMAX)
 
 <!-- 3.2. try looking for historical NHC predictions? (can be skimmed incase of time running out) -->
-## Forecasting: posterior predictive checks
+## Forecasting: checking predictions
 
 Hurricane Dorian 2019. The image shows a 90% credible interval. Black dotted line: true VMAX
 \center
 
 ![](`r dorian`){height=70%}
 
-## Forecasting: posterior predictive checks
+## Forecasting: checking predictions
 
 Hurricane Florence 2018. The image shows a 90% credible interval. Black dotted line: true VMAX
 \center
 
 ![](`r florence`){height=70%}
 
-## Forecasting: posterior predictive checks
+## Forecasting: checking predictions
 
 Hurricane Helene 2018. The image shows a 90% credible interval. Black dotted line: true VMAX
 \center
 
 ![](`r helene`){height=70%}
 
+
+
 <!-- 4. Final section -->
-## Problems to solve & development ideas
+# Concluding section
+
+Further development ideas:
 
 - variable selection in full SHIPS dataset
 - more time series autoregressive components
@@ -296,9 +309,41 @@ Hurricane Helene 2018. The image shows a 90% credible interval. Black dotted lin
 
 
 <!-- 4.1. Conclusions  -->
-## Conclusions & contact info
+## A final takeaway
 <!-- don't put your email address directly : github crawlers will find it and send you spam -->
 
+> "The hurricane will be moving through an environment of low vertical
+wind shear, a moist mid-level atmosphere, and increasing upper-ocean
+heat content, and this is ideal for some additional intensification.
+However, given that the SHIPS models do not show any significant
+change in the intensity, the NHC forecast keeps Irma a powerful
+hurricane through five days."
+> `r tufte::quote_footer('--- NHC 5AM advisory Sep. 5th')`
+
+While the NHC published the advisory, Irma was undergoing rapid intensification from 130 to 175 knots over a span of only a few hours.
+
+## Conclusions & contact info
+
+>- Takeaway: the SHIPS model is terrible!
+>- Simple changes to the predictive distribution can improve the model
+>- Further development using Bayesian methods seems promising and there are several possible directions
+
+More at our Github repo: [https://github.com/jnlb/bda-hurricane-modeling](https://github.com/jnlb/bda-hurricane-modeling)
+
+The SHIPS website: [http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/index.asp](http://rammb.cira.colostate.edu/research/tropical_cyclones/ships/index.asp)
+
+Contact info: 
+
+:::: {.columns}
+::: {.column width="50%"}
+José Miguel Ramírez
+:::
+::: {.column width="50%"}
+Jonas Lindblad
+
+>- rocket-chat: `@jnlb`
+:::
+::::
 
 <!-- 4.2 Extra material -->
 ## Additional information

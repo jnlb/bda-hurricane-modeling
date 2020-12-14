@@ -32,6 +32,8 @@ source("init.r", local = knitr::knit_global())
 # images
 hurricane <- file.path(getwd(), img_path, "hurricane.jpg")
 path <- file.path(getwd(), img_path, "corrplot_delta_small_presentation_centered.png")
+tc_a <- file.path(getwd(), img_path, "tropic_cyclone_a.png")
+tc_b <- file.path(getwd(), img_path, "tropic_cyclone_b.png")
 
 # diagrams
 regression_diag <- file.path(getwd(), img_path, "simple_regression.png")
@@ -378,3 +380,16 @@ variance_model <- rstan::sampling(variance_m,
 <!-- We need to consider what questions the TAs are likely to ask -->
 
 <!-- Consider including an image which explains how Hurricanes form -->
+## Additional information
+
+<!-- hurricane images go here -->
+![](`r tc_a`){width=100%}
+
+Image from *Introduction to Tropical Meteorology, 2nd Ed.*, 2011, by A. Laing & J-L Evans.
+
+## Additional information
+
+<!-- hurricane images go here -->
+![](`r tc_b`){width=100%}
+
+Image from *Introduction to Tropical Meteorology, 2nd Ed.*, 2011, by A. Laing & J-L Evans.

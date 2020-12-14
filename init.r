@@ -21,7 +21,7 @@ file_path <- file.path(data_path, filename)
 years <- c("2017", "2018", "2019")
 
 # default test storm: Hurricane Dorian from 2019
-test_id <- "AL052019"
+test_id <- "AL092018"
 
 load_data <- function(type="basic", target="value", forecast=12, 
                       standardize=FALSE) {

@@ -42,3 +42,4 @@ plotdf <- data.frame(TIME, VMAX, Q10, Q50, Q90)
 evalplot <- ggplot(data=plotdf, aes(y=VMAX, x=TIME)) +
     geom_point() + geom_line() +
     geom_ribbon(aes(ymin=Q10, ymax=Q90), linetype=2, alpha=0.1)
+ggsave("testplot.png", path = img_path, device = png())

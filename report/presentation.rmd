@@ -50,6 +50,9 @@ pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
 pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
 pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
 
+# marginals
+marginals <- file.path(getwd(), img_path, "variance_marginals.pdf")
+
 # forecast plots 
 dorian <- file.path(getwd(), img_path, "eval_dorian2.png")
 chris <- file.path(getwd(), img_path, "eval_chris2.png")
@@ -174,7 +177,7 @@ Model 3: regression with a linear model for standard deviation
 - we standardized all of our data; priors chosen to be weak in standardized scale
 - SHIPS data: 1982-2019; our restriction: 2017-2019
 - poor problem setup! True model is the laws of physics, but we are fitting a regression
-- models were programmed in Stan; sampling with `rstan` resulted in no divergences or issues except for the skew model and the issue was solved by increasing max tree depth to 15
+- models were programmed in Stan; sampling with `rstan` using default parameters; resulted in no divergences or issues except for the skew model and it was solved by increasing max tree depth to 15
 
 <!-- 3.1.1 compare with other models -->
 # Forecasting: Model Comparison
@@ -267,14 +270,9 @@ Model comparison using the Dataset C (LOOCV)
 <!-- Marginal plot for the theta-variables -->
 ## Marginal posteriors
 
->- $\theta_1$: constant term
->- $\theta_2, \theta_3$: latitude, longitude
->- $\theta_4$: sea surface temperature (CSST)
->- $\theta_5$: relative humidity (RHLO)
->- $\theta_6$: wind shear (SHRD)
->- $\theta_7$: maximum potential intensity (VMPI)
->- $\theta_8$: air temperature at 200 mb (T200)
->- $\theta_9$: intensity at storm core (VMAX)
+\center
+
+![](`r marginals`){width=80%}
 
 <!-- 3.2. try looking for historical NHC predictions? (can be skimmed incase of time running out) -->
 ## Forecasting: checking predictions
@@ -339,6 +337,8 @@ Contact info:
 :::: {.columns}
 ::: {.column width="50%"}
 José Miguel Ramírez
+
+>- rocket-chat: `@jose`
 :::
 ::: {.column width="50%"}
 Jonas Lindblad

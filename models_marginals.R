@@ -11,8 +11,6 @@ imp <- mice(ships, m = 1);
 ships <- complete(imp)
 
 # Sample from the Stan models
-# First a linear model
-# with data : MINIMAL-A
 
 y = ships[,ncol(ships)]
 ships[,ncol(ships)] <- NULL 

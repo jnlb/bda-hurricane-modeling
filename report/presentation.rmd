@@ -40,6 +40,15 @@ ships_vars <- file.path(getwd(), img_path, "ships_img_vars.png")
 pareto_linear_path <- file.path(getwd(), img_path, "pareto_linear.png")
 pareto_skew_path <- file.path(getwd(), img_path, "pareto_skew.png")
 pareto_variance_path <- file.path(getwd(), img_path, "pareto_variance.png")
+
+# forecast plots 
+dorian <- file.path(getwd(), img_path, "eval_dorian2.png")
+chris <- file.path(getwd(), img_path, "eval_chris2.png")
+florence <- file.path(getwd(), img_path, "eval_florence2.png")
+gabrielle <- file.path(getwd(), img_path, "eval_gabrielle2.png")
+helene <- file.path(getwd(), img_path, "eval_helene2.png")
+isaac <- file.path(getwd(), img_path, "eval_isaac2.png")
+jose <- file.path(getwd(), img_path, "eval_jose2.png")
 ```
 <!-- note that for syntax reasons there needs to be a space '- ' -->
 - Destructive storms occuring in the late summer and fall in the northern hemisphere’s tropical region.   
@@ -106,14 +115,14 @@ We have not done statistical variable selection. Choice of variable subset is ba
 >- **VMPI**: maximum potential intensity
 
 :::: {.columns}
-::: {.column width="50%"}
-![](`r path`){width=80%}
+::: {.column width="40%"}
+![](`r path`){width=90%}
 :::
-::: {.column width="50%"}
->- for testing, we have some variable sets *A, B, C*
->- *A*: VMAX, CSST, SHRD
->- *B*: VMAX, CSST, SHRD, VMPI
->- *C*: VMAX, CSST, SHRD, VMPI, RHLO, T200
+::: {.column width="60%"}
+>- for testing, we have variable sets *A, B, C*
+>- *A*: LAT/LON, VMAX, CSST, SHRD
+>- *B*: LAT/LON, VMAX, CSST, SHRD, VMPI
+>- *C*: LAT/LON, VMAX, CSST, SHRD, VMPI, RHLO, T200
 :::
 ::::
 
@@ -149,15 +158,12 @@ Model 3: regression with a linear model for standard deviation
 ## Models: some remarks
 
 - SHIPS: predict $V_{max}$; our models: predict $\Delta V_{max}$
+- we also decided to include latitude and longitude as variables; geographic region is known to be important for storm development
 - reminder: we do 12-hour forecasts
 - we standardized all of our data; priors chosen to be weak in standardized scale
 - SHIPS data: 1982-2019; our restriction: 2017-2019
 - poor problem setup! True model is the laws of physics, but we are fitting a regression
 - models were programmed in Stan; sampling with `rstan` resulted in no divergences or issues except for the skew model and the issue was solved by increasing max tree depth to 15
-
-<!-- 3. example forecasts on historical storms -->
-## Forecasting
-
 
 <!-- 3.1.1 compare with other models -->
 ## Forecasting: Model Comparison (1)
@@ -247,11 +253,39 @@ Model comparison using the Dataset C (LOOCV)
 \end{tabular}
 \end{table}
 
+<!-- Marginal plot for the theta-variables -->
+## Marginal posteriors
 
+>- $\theta_1$: constant term
+>- $\theta_2, \theta_3$: latitude, longitude
+>- $\theta_4$: sea surface temperature (CSST)
+>- $\theta_5$: relative humidity (RHLO)
+>- $\theta_6$: wind shear (SHRD)
+>- $\theta_7$: maximum potential intensity (VMPI)
+>- $\theta_8$: air temperature at 200 mb (T200)
+>- $\theta_9$: intensity at storm core (VMAX)
 
 <!-- 3.2. try looking for historical NHC predictions? (can be skimmed incase of time running out) -->
-## Forecasting: what about the NHC?
+## Forecasting: posterior predictive checks
 
+Hurricane Dorian 2019. The image shows a 90% credible interval. Black dotted line: true VMAX
+\center
+
+![](`r dorian`){height=70%}
+
+## Forecasting: posterior predictive checks
+
+Hurricane Florence 2018. The image shows a 90% credible interval. Black dotted line: true VMAX
+\center
+
+![](`r florence`){height=70%}
+
+## Forecasting: posterior predictive checks
+
+Hurricane Helene 2018. The image shows a 90% credible interval. Black dotted line: true VMAX
+\center
+
+![](`r helene`){height=70%}
 
 <!-- 4. Final section -->
 ## Problems to solve & development ideas

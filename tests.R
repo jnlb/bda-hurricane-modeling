@@ -13,7 +13,7 @@ v12q = matrix(data = NA, nrow = K, ncol = 3)
 temp <- sapply(test_data[,"TIME"], function(x) paste0(x,":00"))
 
 # 1. extract quantile info from draws
-probs = c(0.10, 0.50, 0.90)
+probs = c(0.05, 0.50, 0.95)
 for (k in 1:K) {
     
     v12q[k,] = unname(quantile(draws[,paste0("vpred[",k,"]")], probs = probs))
@@ -41,5 +41,6 @@ plotdf <- data.frame(TIME, VMAX, Q10, Q50, Q90)
 # 3. output the ggplot graphic
 evalplot <- ggplot(data=plotdf, aes(y=VMAX, x=TIME)) +
     geom_point() + geom_line() +
-    geom_ribbon(aes(ymin=Q10, ymax=Q90), linetype=2, alpha=0.1)
+    geom_ribbon(aes(ymin=Q10, ymax=Q90), linetype=2, alpha=0.1, fill="blue") +
+    geom_line(aes(y=Q50), color="darkblue")
 ggsave("testplot.png", path = img_path, device = png())

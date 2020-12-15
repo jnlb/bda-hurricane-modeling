@@ -1,8 +1,11 @@
 ---
 title: "BDA Project: Hurricane forecasting in Stan"
 author: | 
-  | José Miguel Ramírez & Jonas Lindblad
+  | José Miguel Ramírez
   | Aalto University
+  | and 
+  | Jonas Lindblad
+  | Åbo Akademi University
 output: 
     beamer_presentation:
         incremental: true
@@ -146,7 +149,7 @@ We have not done statistical variable selection. Choice of variable subset is ba
 <!-- we would need 3 different Kruschke diagrams for the models -->
 
 
-The SHIPS Blunder: a simple linear regression
+The SHIPS model: a simple linear regression
 
 ![](`r regression_diag`){width=95%}
 
@@ -172,8 +175,6 @@ Model 3: regression with a linear model for standard deviation
 ## Models: some remarks
 
 - SHIPS: predict $V_{max}$; our models: predict $\Delta V_{max}$
-- we also decided to include latitude and longitude as variables; geographic region is known to be important for storm development
-- reminder: we do 12-hour forecasts
 - we standardized all of our data; priors chosen to be weak in standardized scale
 - SHIPS data: 1982-2019; our restriction: 2017-2019
 - poor problem setup! True model is the laws of physics, but we are fitting a regression
@@ -379,6 +380,16 @@ variance_model <- rstan::sampling(variance_m,
 ```
 
 <!-- We need to consider what questions the TAs are likely to ask -->
+
+## LGEM model
+
+The Logistic Growth Equation Model models the intensity as 
+
+$$ V_t = V_0 \left[ 1 + \alpha \beta t \left( \frac{V_0}{V_{mpi}} \right)^{\beta} \right]^{(-1/\beta)},$$
+
+where $\alpha, \beta$ are parameters to be fitted.
+
+Reference: *A Simplified Dynamical System for Tropical Cyclone Intensity Prediction,* M. DeMaria, *Monthly Weather Review, 2009.
 
 <!-- Consider including an image which explains how Hurricanes form -->
 ## Additional information
